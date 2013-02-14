@@ -1,0 +1,3 @@
+[submodule "php-facedetection"]
+	path = php-facedetection
+	url = git://github.com/sanchothefat/php-facedetection.git
