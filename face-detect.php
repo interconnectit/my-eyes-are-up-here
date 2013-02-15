@@ -132,19 +132,15 @@ class WP_Image_Editor_GD_Detect_Face extends WP_Image_Editor_GD {
 				$src_x = floor( ($orig_w - $crop_w) / 2 );
 				$src_y = floor( ($orig_h - $crop_h) / 2 );
 
-				// x/y offset
-				$face_src_w = round( $face_src_w * $size_ratio );
-				$face_src_h = round( $face_src_h * $size_ratio );
-				$face_src_x = round( $face_src_x * $size_ratio );
-				$face_src_y = round( $face_src_y * $size_ratio );
-
 				// bounding box
 				if ( $src_x == 0 ) {
-					$src_y = min( max( 0, $face_src_y - ( ( $new_h - $face_src_h ) / 2 ) ), ( $orig_h - $crop_h ) * $size_ratio );
+					$src_y = ( $face_src_y + ($face_src_h / 2) ) - ($crop_h / 2);
+					$src_y = min( max( 0, $src_y ), $orig_h - $crop_h );
 				}
 
 				if ( $src_y == 0 ) {
-					$src_x = min( max( 0, $face_src_x - ( ( $new_w - $face_src_w ) / 2 ) ), ( $orig_w - $crop_w ) * $size_ratio );
+					$src_x = ( $face_src_x + ($face_src_w / 2) ) - ($crop_w / 2);
+					$src_x = min( max( 0, $src_x ), $orig_w - $crop_w );
 				}
 
 				// the return array matches the parameters to imagecopyresampled()
