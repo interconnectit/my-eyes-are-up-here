@@ -14,16 +14,6 @@ https://github.com/markoheijnen
 if ( ! defined( 'FACE_DETECT_PATH' ) )
 	define( 'FACE_DETECT_PATH', plugin_dir_path( __FILE__ ) );
 
-// Image editor classes
-require_once ABSPATH . WPINC . '/class-wp-image-editor.php';
-require_once ABSPATH . WPINC . '/class-wp-image-editor-gd.php';
-
-// Face detection
-require_once 'php-facedetection/FaceDetector.php';
-
-// Face detection image editor
-require_once 'editor/image-editor-gd-face-detect.php';
-
 // track attachment being modified
 add_action( 'init', array( 'WP_Detect_Face', 'setup' ) );
 
@@ -41,7 +31,7 @@ class WP_Detect_Face {
 		add_filter( 'update_attached_file', array( __CLASS__, 'set_attachment_id' ), 10, 2 );
 
 		// use our extended class
-		add_filter( 'wp_image_editors', array( __CLASS__, 'image_editors' ), 10, 1 );
+		add_filter( 'wp_image_editors', array( __CLASS__, 'image_editors' ), 11, 1 );
 
 	}
 
@@ -67,6 +57,14 @@ class WP_Detect_Face {
 	 * @return array    Image editor class names
 	 */
 	public function image_editors( $editors ) {
+		// Face detection class
+		if ( ! class_exists( 'Face_Detector' ) )
+			require_once 'php-facedetection/FaceDetector.php';
+
+		// Face detection image editor
+		if ( ! class_exists( 'WP_Image_Editor_GD_Detect_Face' ) )
+			require_once 'editors/gd-face-detect.php';
+
 		$offset = array_search( 'WP_Image_Editor_GD', $editors );
 		return array_merge(
 			array_slice( $editors, 0, $offset ),
