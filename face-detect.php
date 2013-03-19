@@ -6,6 +6,9 @@ Description: Detects faces during thumbnail cropping and moves the crop position
 Author: Robert O'Rourke @ interconnect/it
 Version: 0.1
 Author URI: http://interconnectit.com
+
+Thanks to Marko Heijnen for feedback
+https://github.com/markoheijnen
 */
 
 if ( ! defined( 'FACE_DETECT_PATH' ) )

@@ -14,9 +14,6 @@ class WP_Image_Editor_GD_Detect_Face extends WP_Image_Editor_GD {
 
 		// edit dims
 		add_filter( 'image_resize_dimensions', array( $this, 'face_crop' ), 10, 6 );
-
-		// memory usage is high
-		add_filter( 'image_memory_limit', array( $this, 'image_memory_limit' ), 10, 1 );
 	}
 
 
@@ -40,6 +37,9 @@ class WP_Image_Editor_GD_Detect_Face extends WP_Image_Editor_GD {
 
 			// detect face
 			if ( $this->faces === null ) {
+				// time consuming - 30s not long enough :(
+				@set_time_limit( 60 );
+
 				// prepare face detector
 				$this->fd = new Face_Detector( FACE_DETECT_PATH . "php-facedetection/{$this->fd_file}" );
 
@@ -114,18 +114,6 @@ class WP_Image_Editor_GD_Detect_Face extends WP_Image_Editor_GD {
 		}
 
 		return null;
-	}
-
-	/**
-	 * Increase the max timeout and double check memory limit
-	 *
-	 * @param string $limit The maximum memory limit allowed by PHP
-	 *
-	 * @return string
-	 */
-	public function image_memory_limit( $limit ) {
-		@set_time_limit( 60 );
-		return $limit;
 	}
 
 }
