@@ -70,19 +70,13 @@ class WP_Image_Editor_GD_Detect_Face extends WP_Image_Editor_GD {
 					if ( $face_src_max_x < $face[ 'x' ] + $face[ 'w' ] ) $face_src_max_x = $face[ 'x' ] + $face[ 'w' ];
 					if ( $face_src_max_y < $face[ 'y' ] + $face[ 'w' ] ) $face_src_max_y = $face[ 'y' ] + $face[ 'w' ];
 					
-					// head flip
-					//$head = imagecreate( $face[ 'w' ], $face[ 'w' ] );
-					//imagecopy( $head, $this->image, 0, 0, $face[ 'x' ], $face[ 'y' ], $face[ 'w' ], $face[ 'w' ] );
-					//$head = imagerotate( $head, 180, 0 );
-					//imagecopymerge( $this->image, $head, $face[ 'x' ], $face[ 'y' ], 0, 0, $face[ 'w' ], $face[ 'w' ], 100 );
-					
 					// rage fersers
-					$img = FACE_DETECT_PATH . '/images/' . rand(1,3) . '.png';
-					$head = imagecreatefrompng( $img );
-					$head2 = imagecreatefrompng( $img );
-					imagecopyresized( $head, $head2, 0, 0, 0, 0, $face['w'], $face['w'], $face['w'], $face['w'] );
-					imagecopymerge( $this->image, $head, $face[ 'x' ], $face[ 'y' ], 0, 0, $face[ 'w' ], $face[ 'w' ], 100 );
+					$head = imagecreate( $face['w'], $face['w'] );
+					$head2 = imagecreatefrompng( FACE_DETECT_PATH . '/images/' . rand(1,16) . '.png' );
+					imagecopyresized( $head, $head2, 0, 0, 0, 0, $face['w'], $face['w'], imagesx($head2), imagesy($head2) );
+					imagecopy( $this->image, $head, $face[ 'x' ], $face[ 'y' ], 0, 0, $face[ 'w' ], $face[ 'w' ] );
 					
+					do_action( 'face_detect_image', $this->image, $face );
 				}
 
 				$face_src_w = $face_src_max_x - $face_src_x;
