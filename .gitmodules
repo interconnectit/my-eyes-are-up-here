@@ -4,3 +4,6 @@
 [submodule "jquery-facedetection"]
 	path = jquery-facedetection
 	url = https://github.com/jaysalvat/jquery.facedetection.git
+[submodule "jquery-facedetction"]
+	path = jquery-facedetction
+	url = git@github.com:jaysalvat/jquery.facedetection.git

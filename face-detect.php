@@ -31,19 +31,19 @@ class WP_Detect_Faces {
 	 * @var int|null Reference to currently edited attachment post
 	 */
 	public static $attachment_id;
-	
+
 	/**
 	 * @var bool Switches on/off the PHP based face detection,
 	 * 			 recommended to use JS as MUCH it's quicker
 	 */
 	public static $use_php = false;
-	
+
 	/**
 	 * @var placeholder for current faces array
 	 */
 	public $faces;
-	
-	
+
+
 	/**
 	 * Reusable object instance.
 	 *
@@ -62,12 +62,12 @@ class WP_Detect_Faces {
 		null === self :: $instance AND self :: $instance = new self;
 		return self :: $instance;
 	}
-	
-	
+
+
 	public function __construct() {
-		
+
 		add_action( 'init', array( $this, 'init' ) );
-		
+
 	}
 
 	public function init() {
@@ -82,89 +82,91 @@ class WP_Detect_Faces {
 
 		// set up js interface
 		if ( ! self::$use_php ) {
-			
+
 			// javascript
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
-			
+
 			// ajax callbacks
 			// - get large image
 			add_action( 'wp_ajax_facedetect_get_image', array( $this, 'get_image' ) );
 			// - save faces
 			add_action( 'wp_ajax_facedetect_save_faces', array( $this, 'save_faces' ) );
-			
+
 			// add button
 			add_filter( 'attachment_fields_to_edit', array( $this, 'edit_fields' ), 10, 2 );
-			
+
 		}
 	}
-	
-	
+
+
 	public function admin_scripts() {
-		
+
+		wp_register_script( 'facedetection-pixastic', FACE_DETECT_URL . '/js/pixastic.custom.js' );
 		wp_register_script( 'facedetection-ccv', FACE_DETECT_URL . '/jquery-facedetection/js/facedetection/ccv.js', array( 'jquery' ) );
 		wp_register_script( 'facedetection-face', FACE_DETECT_URL . '/jquery-facedetection/js/facedetection/face.js', array( 'jquery', 'facedetection-ccv' ) );
 		wp_register_script( 'jquery-facedetection', FACE_DETECT_URL . '/jquery-facedetection/js/jquery.facedetection.js', array( 'facedetection-face' ) );
-		wp_register_script( 'facedetection', FACE_DETECT_URL . '/js/face-detect.js', array( 'jquery-facedetection' ), '0.2', true );
+		wp_register_script( 'facedetection', FACE_DETECT_URL . '/js/face-detect.js', array( 'jquery-facedetection', 'facedetection-pixastic' ), '0.2', true );
 		wp_localize_script( 'facedetection', 'facedetection', array(
 			'ajax_url' 				=> admin_url( '/admin-ajax.php' ),
 			'get_image_nonce' 		=> wp_create_nonce( 'fd_get_image' ),
-			'save_faces_nonce' 		=> wp_create_nonce( 'fd_save_faces' )
+			'save_faces_nonce' 		=> wp_create_nonce( 'fd_save_faces' ),
+			'pink' 					=> FACE_DETECT_URL . '/js/pink.png'
 		) );
-		
+
 		// load our scripts
 		wp_enqueue_script( 'facedetection' );
-		
+
 	}
-	
-	
+
+
 	public function get_image() {
 		check_ajax_referer( 'fd_get_image', 'fd_get_image_nonce' );
-		
+
 		$response = array( 'img' => false );
-		
+
 		$att_id = isset( $_POST[ 'attachment_id' ] ) ? intval( $_POST[ 'attachment_id' ] ) : false;
-		
+
 		if ( $att_id )
 			$response = array( 'img' => wp_get_attachment_image_src( $att_id, 'full' ) );
-		
+
 		$this->send_json( $response );
 	}
-	
-	
+
+
 	public function save_faces() {
 		check_ajax_referer( 'fd_save_faces', 'fd_save_faces_nonce' );
-		
+
 		$response = array();
-		
+
 		$att_id = isset( $_POST[ 'attachment_id' ] ) ? intval( $_POST[ 'attachment_id' ] ) : false;
-		
+
 		// faces
 		$this->faces = $_POST[ 'faces' ];
 		update_post_meta( $att_id, 'faces', $this->faces );
-		
+
 		// regenerate thumbs
 		$resized = $this->regenerate_thumbs( $att_id );
-		
+
 		if ( ! empty( $resized ) )
 			$response[ 'resized' ] = $resized;
-		
+
 		$this->send_json( $response );
 	}
-	
-	
+
+
 	public function regenerate_thumbs( $attachment_id ) {
 		global $_wp_additional_image_sizes;
-		
+
 		// image resize dimensions
 		add_filter( 'image_resize_dimensions', array( $this, 'face_crop' ), 10, 6 );
-		
+
 		$file = get_attached_file( $attachment_id );
-		
+
 		$imagedata = wp_get_attachment_metadata( $attachment_id );
-		
+
 		$sizes = get_intermediate_image_sizes();
 		$resized = array();
-		
+
 		foreach( $sizes as $size ) {
 			if ( in_array( $size, array( 'thumbnail', 'medium', 'large' ) ) ) {
 				$width  = intval( get_option( $size . '_size_w' ) );
@@ -178,21 +180,21 @@ class WP_Detect_Faces {
 			if ( $crop && $new_size = image_make_intermediate_size( $file, $width, $height, true ) )
 				$resized[ $size ] = $new_size;
 		}
-		
+
 		return $resized;
 	}
-	
-	
+
+
 	function edit_fields( $form_fields, $attachment ) {
-		
+
 		$faces = get_post_meta( $attachment->ID, 'faces', true );
-		
+
 		$button = '<button class="button face-detection-activate hide-if-no-js" type="button" data-attachment-id="' . $attachment->ID . '">' . __( 'Detect Faces' ) . '</button> <span class="status"></span>';
-		
+
 		if ( $faces ) {
 			$button .= ' <p class="detected-faces">' . count( $faces ) . ' faces found, thumbnails regenerated to fit them into crop area.</p>';
 		}
-	
+
 		$form_fields[ 'face_detection' ] = array(
 			'label' => __( 'Face detection' ),
 			'input' => 'html',
@@ -201,15 +203,15 @@ class WP_Detect_Faces {
 
 		return $form_fields;
 	}
-	
-	
+
+
 	public function send_json( $response ) {
 		header( 'Content-type: application/json' );
 		echo json_encode( $response );
 		exit;
 	}
-	
-	
+
+
 	/**
 	 * Alters the crop location of the GD image editor class by detecting faces
 	 * and centering the crop around them
@@ -291,7 +293,7 @@ class WP_Detect_Faces {
 
 		return null;
 	}
-	
+
 
 	/**
 	 * Hacky use of attached_file filters to get current attachment ID being resized
