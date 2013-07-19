@@ -72,19 +72,6 @@
 											paddingLeft: 0,
 											background: 'none'
 										} ).html( 'Thumbnails re-cropped' );
-										$.each( faces, function( i, item ) {
-											Pixastic.process( img, 'crop', {
-												rect: {
-													left: item.x,
-													top: item.y,
-													width: item.width,
-													height: item.height
-												}
-											}, function( face ) {
-												console.log( face );
-												$statusbox.after( face );
-											} );
-										} );
 									} else {
 										console.log( 'no regenerated thumbs', rsp );
 										$statusbox.css( {
