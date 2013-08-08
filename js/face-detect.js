@@ -8,6 +8,7 @@
 		e.preventDefault();
 
 		var $statusbox = $( this ).next(),
+			$foundbox = $statusbox.next(),
 			attachment_id = $( this ).data( 'attachment-id' );
 
 		// update status - loading full image
@@ -42,10 +43,12 @@
 						// face detection
 						$( '#facedetect-image' ).faceDetection( {
 							confidence: 0,
-							start: function( img ) {}, // doesn't work yet
+							start: function( img ) {
+								$statusbox.html( 'Looking for faces' );
+							}, // doesn't work yet
 							complete: function( img, faces ) {
 								// update status - found faces
-								console.log( faces );
+								console.log( 'img:', img, 'faces:', faces );
 
 								if ( ! faces.length ) {
 									console.log( 'no faces...' );
@@ -57,6 +60,30 @@
 								}
 
 								$statusbox.html( 'Found ' + faces.length + ' faces, re-cropping thumbnails' );
+
+								$.each( faces, function( i, item ) {
+									console.log( img, item );
+									Pixastic.process( image, 'crop', {
+										rect: {
+											left: item.x,
+											top: item.y,
+											width: item.width,
+											height: item.height
+										}
+									}, function( face ) {
+										console.log( face );
+										$( face )
+											.removeAttr( 'id' )
+											.css( {
+												position: 'static',
+												width: 40,
+												height: 'auto',
+												margin: '10px 10px 0 0',
+												display: 'inline-block'
+											} )
+											.appendTo( $foundbox );
+									} );
+								} );
 
 								// save data & regen
 								$.post( facedetection.ajax_url, {
@@ -72,6 +99,7 @@
 											paddingLeft: 0,
 											background: 'none'
 										} ).html( 'Thumbnails re-cropped' );
+
 									} else {
 										console.log( 'no regenerated thumbs', rsp );
 										$statusbox.css( {

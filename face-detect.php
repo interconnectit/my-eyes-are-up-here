@@ -189,7 +189,7 @@ class WP_Detect_Faces {
 
 		$faces = get_post_meta( $attachment->ID, 'faces', true );
 
-		$button = '<button class="button face-detection-activate hide-if-no-js" type="button" data-attachment-id="' . $attachment->ID . '">' . __( 'Detect Faces' ) . '</button> <span class="status"></span>';
+		$button = '<button class="button face-detection-activate hide-if-no-js" type="button" data-attachment-id="' . $attachment->ID . '">' . __( 'Detect Faces' ) . '</button> <span class="status"></span> <div class="found-faces"></div>';
 
 		if ( $faces ) {
 			$button .= ' <p class="detected-faces">' . count( $faces ) . ' faces found, thumbnails regenerated to fit them into crop area.</p>';
