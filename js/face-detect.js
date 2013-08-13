@@ -246,7 +246,7 @@ if ( ! window.console )
 							y: Math.round( ( $( this ).position().top ) * correction )
 						} );
 					} );
-					
+
 					$( '.face-detection-image' ).removeClass( 'active' );
 
 					if ( ! t.hotspots.length )
@@ -317,7 +317,7 @@ if ( ! window.console )
 						.load( function() {
 							$( this ).fadeTo( 300, 1 );
 							if ( i == previews_length - 1 )
-								t.update_status( 'Preview ready' );
+								t.update_status( '' );
 						} );
 				} );
 
