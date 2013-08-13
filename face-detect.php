@@ -41,7 +41,8 @@ class WP_Detect_Faces {
 	/**
 	 * @var placeholder for current faces array
 	 */
-	public $faces;
+	public $faces = array();
+	public $hotspots = array();
 
 
 	/**
@@ -90,7 +91,7 @@ class WP_Detect_Faces {
 			// - get large image
 			add_action( 'wp_ajax_facedetect_get_image', array( $this, 'get_image' ) );
 			// - save faces
-			add_action( 'wp_ajax_facedetect_save_faces', array( $this, 'save_faces' ) );
+			add_action( 'wp_ajax_facedetect_save', array( $this, 'save' ) );
 
 			// add button
 			add_filter( 'attachment_fields_to_edit', array( $this, 'edit_fields' ), 10, 2 );
@@ -109,12 +110,14 @@ class WP_Detect_Faces {
 		wp_localize_script( 'facedetection', 'facedetection', array(
 			'ajax_url' 				=> admin_url( '/admin-ajax.php' ),
 			'get_image_nonce' 		=> wp_create_nonce( 'fd_get_image' ),
-			'save_faces_nonce' 		=> wp_create_nonce( 'fd_save_faces' ),
-			'pink' 					=> FACE_DETECT_URL . '/js/pink.png'
+			'save_nonce' 		=> wp_create_nonce( 'fd_save' )
 		) );
 
 		// load our scripts
 		wp_enqueue_script( 'facedetection' );
+
+		// stylesheet
+		wp_enqueue_style( 'facedetection', FACE_DETECT_URL . '/css/admin.css' );
 
 	}
 
@@ -122,27 +125,41 @@ class WP_Detect_Faces {
 	public function get_image() {
 		check_ajax_referer( 'fd_get_image', 'fd_get_image_nonce' );
 
-		$response = array( 'img' => false );
+		$response = array( 'original' => false );
 
 		$att_id = isset( $_POST[ 'attachment_id' ] ) ? intval( $_POST[ 'attachment_id' ] ) : false;
 
 		if ( $att_id )
-			$response = array( 'img' => wp_get_attachment_image_src( $att_id, 'full' ) );
+			$response = array(
+				'original' => wp_get_attachment_image_src( $att_id, 'full' )
+			);
 
 		$this->send_json( $response );
 	}
 
 
-	public function save_faces() {
-		check_ajax_referer( 'fd_save_faces', 'fd_save_faces_nonce' );
+	public function save() {
+		check_ajax_referer( 'fd_save', 'fd_save_nonce' );
 
 		$response = array();
 
 		$att_id = isset( $_POST[ 'attachment_id' ] ) ? intval( $_POST[ 'attachment_id' ] ) : false;
 
 		// faces
-		$this->faces = $_POST[ 'faces' ];
-		update_post_meta( $att_id, 'faces', $this->faces );
+		if ( isset( $_POST[ 'faces' ] ) ) {
+			if ( $_POST[ 'faces' ] )
+				update_post_meta( $att_id, 'faces', $_POST[ 'faces' ] );
+			else
+				delete_post_meta( $att_id, 'faces' );
+		}
+
+		// hotspots
+		if ( isset( $_POST[ 'hotspots' ] ) ) {
+			if ( $_POST[ 'hotspots' ] )
+				update_post_meta( $att_id, 'hotspots', $_POST[ 'hotspots' ] );
+			else
+				delete_post_meta( $att_id, 'hotspots' );
+		}
 
 		// regenerate thumbs
 		$resized = $this->regenerate_thumbs( $att_id );
@@ -154,20 +171,14 @@ class WP_Detect_Faces {
 	}
 
 
-	public function regenerate_thumbs( $attachment_id ) {
+	public function get_cropped_sizes() {
 		global $_wp_additional_image_sizes;
 
-		// image resize dimensions
-		add_filter( 'image_resize_dimensions', array( $this, 'face_crop' ), 10, 6 );
+		$sizes = array();
 
-		$file = get_attached_file( $attachment_id );
+		$size_names = get_intermediate_image_sizes();
 
-		$imagedata = wp_get_attachment_metadata( $attachment_id );
-
-		$sizes = get_intermediate_image_sizes();
-		$resized = array();
-
-		foreach( $sizes as $size ) {
+		foreach( $size_names as $size ) {
 			if ( in_array( $size, array( 'thumbnail', 'medium', 'large' ) ) ) {
 				$width  = intval( get_option( $size . '_size_w' ) );
 				$height = intval( get_option( $size . '_size_h' ) );
@@ -177,8 +188,38 @@ class WP_Detect_Faces {
 				$height = $_wp_additional_image_sizes[ $size ][ 'height' ];
 				$crop  	= $_wp_additional_image_sizes[ $size ][ 'crop' ];
 			}
-			if ( $crop && $new_size = image_make_intermediate_size( $file, $width, $height, true ) )
-				$resized[ $size ] = $new_size;
+			if ( $crop )
+				$sizes[ $size ] = array( 'width' => $width, 'height' => $height, 'crop' => $crop );
+		}
+
+		return $sizes;
+	}
+
+
+	public function regenerate_thumbs( $attachment_id ) {
+
+		// get existing data
+		$faces = get_post_meta( $attachment_id, 'faces', true );
+		$hotspots = get_post_meta( $attachment_id, 'hotspots', true );
+
+		if ( $faces )
+			$this->faces = $faces;
+		if ( $hotspots )
+			$this->hotspots = $hotspots;
+
+		// image resize dimensions
+		add_filter( 'image_resize_dimensions', array( $this, 'crop' ), 10, 6 );
+
+		$file = get_attached_file( $attachment_id );
+
+		$imagedata = wp_get_attachment_metadata( $attachment_id );
+
+		$sizes = $this->get_cropped_sizes();
+		$resized = array();
+
+		foreach( $sizes as $size => $atts ) {
+			if ( $new_size = image_make_intermediate_size( $file, $atts[ 'width' ], $atts[ 'height' ], true ) )
+				$resized[ $size ] = wp_get_attachment_image_src( $attachment_id, $size );
 		}
 
 		return $resized;
@@ -188,12 +229,65 @@ class WP_Detect_Faces {
 	function edit_fields( $form_fields, $attachment ) {
 
 		$faces = get_post_meta( $attachment->ID, 'faces', true );
+		$hotspots = get_post_meta( $attachment->ID, 'hotspots', true );
 
-		$button = '<button class="button face-detection-activate hide-if-no-js" type="button" data-attachment-id="' . $attachment->ID . '">' . __( 'Detect Faces' ) . '</button> <span class="status"></span> <div class="found-faces"></div>';
+		$data_atts = '';
+		if ( $faces )
+			$data_atts .= ' data-faces="' . esc_attr( json_encode( $faces ) ) . '"';
+		if ( $hotspots )
+			$data_atts .= ' data-hotspots="' . esc_attr( json_encode( $hotspots ) ) . '"';
 
-		if ( $faces ) {
-			$button .= ' <p class="detected-faces">' . count( $faces ) . ' faces found, thumbnails regenerated to fit them into crop area.</p>';
+		$button = '
+		<div class="face-detection-ui hide-if-no-js">
+			<div class="post-thumbnail-preview alignright">
+				<div><strong>' . __( 'Thumb Previews' ) . '</strong></div>';
+
+		foreach( $this->get_cropped_sizes() as $size => $atts ) {
+			$src = wp_get_attachment_image_src( $attachment->ID, $size );
+			$button .= '<div class="preview-wrap"><img src="' . $src[ 0 ] . '?v=' . time() . '" alt="' . $size . '" data-size="' . $size . '" /></div>';
 		}
+
+		$button .= '
+			</div>
+			<div class="face-detection face-detect-panel">';
+
+		if ( $faces )
+			$button .= '<button class="button face-detection-activate has-faces" type="button" data-attachment-id="' . $attachment->ID . '">' . __( 'Forget found faces' ) . '</button>';
+		else
+			$button .= '<button class="button face-detection-activate" type="button" data-attachment-id="' . $attachment->ID . '">' . __( 'Detect faces' ) . '</button>';
+
+		$button .= '
+				<span class="status"></span>
+				<p class="description">' . __( 'Please note this is basic face detection and won\'t find everything. Use hotspots to highlight any that were missed.' ) . '</p>
+				<div class="found-faces"></div>';
+
+		if ( false && $faces )
+			$button .= ' <p class="detected-faces">' . count( $faces ) . ' ' . _n( 'face', 'faces', count( $faces ) ) . ' found, thumbnails regenerated to fit them into crop area.</p>';
+
+		$button .= '
+			</div>
+			<div class="image-hotspots face-detect-panel">';
+
+		if ( $hotspots )
+			$button .= '<button class="button add-hotspots has-hotspots" type="button" data-attachment-id="' . $attachment->ID . '">' . __( 'Edit hotspots' ) . '</button>';
+		else
+			$button .= '<button class="button add-hotspots" type="button" data-attachment-id="' . $attachment->ID . '">' . __( 'Add hotspots' ) . '</button>';
+
+		$button .= '
+				<span class="status"></span>
+				<p class="description">' . __( 'Manually add hotspots that you want to avoid cropping.' ) . '</p>';
+
+		if ( false && $hotspots )
+			$button .= ' <p class="added-hotspots">' . count( $hotspots ) . ' ' . _n( 'hotspot', 'hotspots', count( $hotspots ) ) . ' found, thumbnails were regenerated to fit them into crop area.</p>';
+
+		$button .= '
+			</div>
+			<div class="face-detection-crop-preview"></div>
+			<div class="face-detection-image"' . $data_atts . '></div>
+		</div>
+		<div class="hide-if-js">
+			<p>' . __( 'This plugin requires javascript to work' ) . '</p>
+		</div>';
 
 		$form_fields[ 'face_detection' ] = array(
 			'label' => __( 'Face detection' ),
@@ -225,13 +319,15 @@ class WP_Detect_Faces {
 	 *
 	 * @return array
 	 */
-	public function face_crop( $output, $orig_w, $orig_h, $dest_w, $dest_h, $crop ) {
+	public function crop( $output, $orig_w, $orig_h, $dest_w, $dest_h, $crop ) {
 
 		// only need to detect if cropping
 		if ( $crop ) {
 
 			// if we have a face or two
-			if ( is_array( $this->faces ) ) {
+			$faces = array_merge( $this->faces, $this->hotspots );
+
+			if ( count( $faces ) ) {
 
 				// get faces area
 				$face_src_x = 9999999999999;
@@ -240,7 +336,7 @@ class WP_Detect_Faces {
 				$face_src_max_y = $face_src_max_h = 0;
 
 				// create bounding box
-				foreach( $this->faces as $face ) {
+				foreach( $faces as $face ) {
 					// left and top most x,y
 					if ( $face_src_x > $face[ 'x' ] ) $face_src_x = $face[ 'x' ];
 					if ( $face_src_y > $face[ 'y' ] ) $face_src_y = $face[ 'y' ];

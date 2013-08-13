@@ -1,138 +1,375 @@
+window.hotspots = {};
+
+// prevent errors while logging to browsers that support it
+if ( ! window.console )
+	window.console = { log: function(){ } };
+
 ;(function($){
 
-	// prevent errors while logging to browsers that support it
-	if ( ! window.console )
-		window.console = { log: function(){ } };
+	"use strict"
 
-	$( document ).on( 'click', '.face-detection-activate', function(e) {
-		e.preventDefault();
+	function hotspots() {
 
-		var $statusbox = $( this ).next(),
-			$foundbox = $statusbox.next(),
-			attachment_id = $( this ).data( 'attachment-id' );
+		var t = this;
 
-		// update status - loading full image
-		$statusbox.css( {
-			marginLeft: '5px',
-			paddingLeft: '20px',
-			background: 'url(/wp-admin/images/wpspin_light.gif) no-repeat left center',
-			backgroundSize: 'contain'
-		} ).html( 'Loading full image' );
+		$.extend( t, {
 
-		// request full image
-		$.post( facedetection.ajax_url, {
-			action: 'facedetect_get_image',
-			fd_get_image_nonce: facedetection.get_image_nonce,
-			attachment_id: attachment_id
-		}, function( rsp ) {
-			if ( rsp && rsp.img ) {
-				var image = new Image();
-				image.src = rsp.img[ 0 ];
+			_construct: function() {
 
-				console.log( rsp, image );
+				// bind behaviour to buttons
+				$( document ).on( 'click', '.face-detection-activate', function() {
+					t.set_context( this );
+					t.get_image( t.detect_faces );
+				} );
+				$( document ).on( 'click', '.add-hotspots', function() {
+					t.set_context( this );
+					t.get_image( t.add_hotspots );
+				} );
 
-				$( image )
-					.attr( 'id', 'facedetect-image' )
-					.css( { position: 'absolute', top: '-9999px', left: '-9999px' } )
-					.appendTo( 'body' )
-					.load( function() {
+			},
 
-						// update status - finding faces
-						$statusbox.html( 'Looking for faces' );
+			attachment_id: null,
+			el: null,
+			image: null,
+			hidden: null,
+			images: null,
+			$context: null,
+			$status_box: null,
+			hotspots: [],
+			faces: [],
 
-						// face detection
-						$( '#facedetect-image' ).faceDetection( {
-							confidence: 0,
-							start: function( img ) {
-								$statusbox.html( 'Looking for faces' );
-							}, // doesn't work yet
-							complete: function( img, faces ) {
-								// update status - found faces
-								console.log( 'img:', img, 'faces:', faces );
+			set_context: function( el ) {
+				t.el = el;
+				t.attachment_id = $( el ).data( 'attachment-id' );
+				t.$ui = $( el ).parents( '.face-detection-ui' );
+				t.$context = $( el ).parents( '.face-detect-panel' );
+				t.$status_box = t.$context.find( '.status' );
+			},
 
-								if ( ! faces.length ) {
-									console.log( 'no faces...' );
-									$statusbox.css( {
-										paddingLeft: 0,
-										background: 'none'
-									} ).html( 'No faces found' );
-									return;
-								}
+			// request full image
+			get_image: function( callback ) {
+				callback = callback || function(){ return false; };
 
-								$statusbox.html( 'Found ' + faces.length + ' faces, re-cropping thumbnails' );
+				if ( t.image && t.$ui.find( '.face-detection-image img' ).length )
+					return callback();
 
-								$.each( faces, function( i, item ) {
-									console.log( img, item );
-									Pixastic.process( image, 'crop', {
-										rect: {
-											left: item.x,
-											top: item.y,
-											width: item.width,
-											height: item.height
-										}
-									}, function( face ) {
-										console.log( face );
-										$( face )
-											.removeAttr( 'id' )
-											.css( {
-												position: 'static',
-												width: 40,
-												height: 'auto',
-												margin: '10px 10px 0 0',
-												display: 'inline-block'
-											} )
-											.appendTo( $foundbox );
-									} );
-								} );
+				t.update_status( 'Loading full size image', true );
+				$.post( facedetection.ajax_url, {
+					action: 'facedetect_get_image',
+					fd_get_image_nonce: facedetection.get_image_nonce,
+					attachment_id: t.attachment_id
+				}, function( rsp ) {
+					if ( rsp && rsp.original ) {
 
-								// save data & regen
-								$.post( facedetection.ajax_url, {
-									action: 'facedetect_save_faces',
-									fd_save_faces_nonce: facedetection.save_faces_nonce,
-									attachment_id: attachment_id,
-									faces: faces
-								}, function( rsp ) {
-									if ( rsp && rsp.resized ) {
-										// update status - thumbs regenerated
-										console.log( '', rsp.resized );
-										$statusbox.css( {
-											paddingLeft: 0,
-											background: 'none'
-										} ).html( 'Thumbnails re-cropped' );
+						// set our image
+						t.image = new Image();
 
-									} else {
-										console.log( 'no regenerated thumbs', rsp );
-										$statusbox.css( {
-											paddingLeft: 0,
-											background: 'none'
-										} ).html( 'No thumbnails were re-cropped' );
-									}
-								}, 'json' );
+						// save for later
+						t.images = rsp;
 
-								// cleanup
-								$( '#facedetect-image' ).remove();
-							},
-							error: function( img, code, message  ) {
-								// update status - error, message
-								console.log( 'error', message );
-								$statusbox.css( {
-									paddingLeft: 0,
-									background: 'none'
-								} ).html( 'Error (' + code + '): ' + message );
+						// set source to original uncropped image
+						t.image.src = rsp.original[0];
 
-								// cleanup
-								$( '#facedetect-image' ).remove();
-							}
+						$( t.image )
+							.appendTo( '.face-detection-image' )
+							.load( function() {
+								t.update_status( 'Image loaded' );
+
+								// add our large off-screen sampler for pixastic etc...
+								if ( ! $( '.face-detect-large-hidden' ).length )
+									$( 'body' ).append( '<img class="face-detect-large-hidden" src="" alt="" />' );
+								$( '.face-detect-large-hidden' ).attr( 'src', rsp.original[0] );
+
+								// show current data
+								t.show_existing( $( '.face-detection-image' ).data( 'hotspots' ) );
+								t.show_existing( $( '.face-detection-image' ).data( 'faces' ), 'face' );
+
+								return callback();
+							} );
+
+					}
+				}, 'json' );
+
+				return false;
+			},
+
+			update_status: function( status, loading ) {
+				loading = loading || false;
+				if ( status )
+					t.$status_box.html( status );
+				if ( loading )
+					t.$status_box.addClass( 'loading' );
+				else
+					t.$status_box.removeClass( 'loading' );
+			},
+
+			detect_faces: function() {
+
+				var $found_box = t.$context.find( '.found-faces' ),
+					image = $( '.face-detect-large-hidden' ).get( 0 ),
+					image_copy = $( image )
+									.clone()
+									.removeClass( 'face-detect-large-hidden' )
+									.addClass( 'face-detect-large-hidden-copy' )
+									.appendTo( 'body' )
+									.get( 0 );
+
+				if ( $( t.el ).hasClass( 'has-faces' ) ) {
+					$( image_copy ).remove();
+					//$found_box.html( '' );
+					$( t.el )
+						.removeClass( 'has-faces' )
+						.html( 'Detect faces' );
+					$( '.face-detection-image' )
+						.data( 'faces', '' )
+						.find( '.face' )
+						.remove();
+					return t.save( { faces: 0 } );
+				}
+
+				// face detection
+				return $( image_copy ).faceDetection( {
+					confidence: 0.05,
+					start: function( img ) {
+						t.update_status( 'Looking for faces', true );
+					}, // doesn't work yet
+					complete: function( img, faces ) {
+						// update status - found faces
+						console.log( 'img:', img, 'faces:', faces );
+
+						t.faces = faces;
+
+						if ( ! t.faces.length ) {
+							t.update_status( 'No faces were found' );
+							return;
+						}
+
+						// allow removal of found faces
+						$( t.el )
+							.addClass( 'has-faces' )
+							.html( 'Forget found faces' );
+
+						t.update_status( 'Found ' + t.faces.length + ' faces, re-cropping thumbnails', true );
+
+						// append the faces found
+						//$.each( t.faces, function( i, item ) {
+						//	Pixastic.process( image_copy, 'crop', {
+						//		rect: {
+						//			left: item.x,
+						//			top: item.y,
+						//			width: item.width,
+						//			height: item.height
+						//		}
+						//	}, function( face ) {
+						//		$( face )
+						//			.removeAttr( 'id' )
+						//			.appendTo( $found_box );
+						//	} );
+						//} );
+
+						t.show_existing( t.faces, 'face' );
+
+						// cleanup
+						$( image_copy ).remove();
+
+						// save data & regen
+						t.save( { faces: t.faces } );
+
+					},
+					error: function( img, code, message  ) {
+						// update status - error, message
+						console.log( 'error', message );
+						t.update_status( 'Error (' + code + '): ' + message );
+					}
+				} );
+
+			},
+
+			show_existing: function( data, type ) {
+				type = type || 'normal';
+
+				var width = $( t.image ).width(),
+					correction = t.images.original[1] / width,
+					hotspot_width;
+
+				if ( data && data !== '' ) {
+					$.each( data, function( i, hotspot ) {
+						t.add_hotspot( {
+							x: (hotspot.x / correction), // + ((hotspot_width/correction)/2),
+							y: (hotspot.y / correction), // + ((hotspot_width/correction)/2),
+							width: hotspot.width / correction,
+							type: type
 						} );
+					} );
+				}
+			},
 
+			add_hotspots: function() {
+
+				var width = $( t.image ).width(),
+					hotspot_width = width * .15,
+					correction = t.images.original[1] / width;
+
+				// activate hotspots
+				if ( ! $( '.face-detection-image' ).hasClass( 'active' ) ) {
+
+					// edit button
+					$( t.el )
+						.addClass( 'active' )
+						.html( 'Finish adding hotspots' );
+
+					t.$ui.find( 'button' ).not( t.el ).attr( 'disabled', 'disabled' );
+
+					t.update_status( 'Click on the image below to add hotspots. Clicking a hotspot will remove it.' );
+
+					// bind hotspot toggling
+					$( t.image ).on( 'click.hotspots', t.hotspot_click );
+
+					$( '.face-detection-image' ).addClass( 'active' );
+
+				// deactivate & save
+				} else {
+
+					// edit button
+					$( t.el )
+						.removeClass( 'active' )
+						.html( 'Edit hotspots' );
+
+					// remove hotspot toggling
+					$( t.image ).off( 'click.hotspots' );
+
+					t.hotspots = [];
+					$( '.face-detection-image .hotspot' ).not( '.face' ).each( function() {
+						t.hotspots.push( {
+							width: Math.round( $( this ).width() * correction ),
+							x: Math.round( ( $( this ).position().left ) * correction ),
+							y: Math.round( ( $( this ).position().top ) * correction )
+						} );
+					} );
+					
+					$( '.face-detection-image' ).removeClass( 'active' );
+
+					if ( ! t.hotspots.length )
+						t.hotspots = 0;
+
+					// save data
+					t.save( { hotspots: t.hotspots } );
+
+				}
+
+			},
+
+			hotspot_click: function( e ) {
+
+				var width = $( t.image ).width(),
+					hotspot_offset = ( width * .15 ) / 2;
+
+				console.log( width, hotspot_offset );
+
+				t.add_hotspot( {
+					x: e.offsetX - hotspot_offset,
+					y: e.offsetY - hotspot_offset
+				} );
+
+			},
+
+			add_hotspot: function( hotspot ) {
+
+				var width = $( t.image ).width(),
+					height = $( t.image ).height(),
+					$parent = $( '.face-detection-image' );
+
+				hotspot = $.extend( {
+					x: 0,
+					y: 0,
+					width: width * .15, // default 15% wide
+					type: 'normal'
+				}, hotspot );
+
+				$( '<div class="hotspot ' + hotspot.type + '"></div>' )
+					.css( {
+						left: ( ( hotspot.x / width ) * 100 ) + '%',
+						top: ( ( hotspot.y / height ) * 100 ) + '%',
+						width: ( ( hotspot.width / width ) * 100 ) + '%',
+						paddingBottom: ( ( hotspot.width / width ) * 100 ) + '%'
+					} )
+					.attr( 'title', hotspot.type == 'normal' ? 'Click to toggle on/off' : '' )
+					.appendTo( $parent )
+					.click( function() {
+						if ( ! $( this ).hasClass( 'face' ) && $parent.hasClass( 'active' ) )
+							$( this ).remove();
 					} );
 
+			},
 
-			} else {
-				console.log( 'No image url found' );
+			// show a cropped thumbnail preview
+			preview: function() {
+
+				var $previews = $( '.post-thumbnail-preview img' ),
+					previews_length = $previews.length;
+
+				t.update_status( 'Updating preview', true );
+
+				$previews.each( function( i ) {
+					$( this )
+						.fadeTo( 300, .25 )
+						.attr( 'src', t.images[ $( this ).data( 'size' ) ][0] + '?t=' + new Date().getTime() )
+						.load( function() {
+							$( this ).fadeTo( 300, 1 );
+							if ( i == previews_length - 1 )
+								t.update_status( 'Preview ready' );
+						} );
+				} );
+
+			},
+
+			save: function( data ) {
+
+				t.update_status( 'Re-cropping thumbnails', true );
+
+				t.$ui.find( 'button' ).attr( 'disabled', 'disabled' );
+
+				console.log( data, $.extend( {
+					action: 'facedetect_save',
+					fd_save_nonce: facedetection.save_nonce,
+					attachment_id: t.attachment_id
+				}, data ) );
+
+				$.post( facedetection.ajax_url, $.extend( {
+					action: 'facedetect_save',
+					fd_save_nonce: facedetection.save_nonce,
+					attachment_id: t.attachment_id
+				}, data ), function( rsp ) {
+					if ( rsp && rsp.resized ) {
+
+						t.update_status( 'Thumbnails re-cropped' );
+
+						$.extend( t.images, rsp.resized );
+
+						t.preview();
+
+					} else {
+
+						t.update_status( 'No thumbnails were re-cropped' );
+
+					}
+
+					t.$ui.find( 'button' ).removeAttr( 'disabled' );
+				}, 'json' );
+
 			}
-		}, 'json' );
 
-	} );
+
+		} );
+
+		// initialise
+		t._construct();
+
+		return t;
+
+	}
+
+	// initialise
+	window.hotspots = new hotspots();
 
 })(jQuery);
