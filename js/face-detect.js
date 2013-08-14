@@ -311,6 +311,8 @@ if ( ! window.console )
 				t.update_status( 'Updating preview', true );
 
 				$previews.each( function( i ) {
+					if ( ! t.images[ $( this ).data( 'size' ) ] )
+						return;
 					$( this )
 						.fadeTo( 300, .25 )
 						.attr( 'src', t.images[ $( this ).data( 'size' ) ][0] + '?t=' + new Date().getTime() )
@@ -328,12 +330,6 @@ if ( ! window.console )
 				t.update_status( 'Re-cropping thumbnails', true );
 
 				t.$ui.find( 'button' ).attr( 'disabled', 'disabled' );
-
-				console.log( data, $.extend( {
-					action: 'facedetect_save',
-					fd_save_nonce: facedetection.save_nonce,
-					attachment_id: t.attachment_id
-				}, data ) );
 
 				$.post( facedetection.ajax_url, $.extend( {
 					action: 'facedetect_save',

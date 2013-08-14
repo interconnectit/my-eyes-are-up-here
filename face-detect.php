@@ -200,11 +200,10 @@ class WP_Detect_Faces {
 
 		// get existing data
 		$faces = get_post_meta( $attachment_id, 'faces', true );
-		$hotspots = get_post_meta( $attachment_id, 'hotspots', true );
-
-		if ( $faces )
+		if ( ! empty( $faces ) )
 			$this->faces = $faces;
-		if ( $hotspots )
+		$hotspots = get_post_meta( $attachment_id, 'hotspots', true );
+		if ( ! empty( $hotspots ) )
 			$this->hotspots = $hotspots;
 
 		// image resize dimensions
@@ -212,7 +211,10 @@ class WP_Detect_Faces {
 
 		$file = get_attached_file( $attachment_id );
 
-		$imagedata = wp_get_attachment_metadata( $attachment_id );
+		// $imagedata = wp_get_attachment_metadata( $attachment_id );
+
+		// update meta data
+		wp_update_attachment_metadata( $attachment_id, wp_generate_attachment_metadata( $attachment_id, $file ) );
 
 		$sizes = $this->get_cropped_sizes();
 		$resized = array();
@@ -382,7 +384,7 @@ class WP_Detect_Faces {
 
 				// the return array matches the parameters to imagecopyresampled()
 				// int dst_x, int dst_y, int src_x, int src_y, int dst_w, int dst_h, int src_w, int src_h
-				return array( 0, 0, $src_x, $src_y, $dest_w, $dest_h, $crop_w, $crop_h );
+				return array( 0, 0, $src_x, $src_y, $new_w, $new_h, $crop_w, $crop_h );
 			}
 
 		}
