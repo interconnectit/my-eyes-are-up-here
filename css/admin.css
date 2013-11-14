@@ -31,10 +31,14 @@
 	border: 0px solid #ccc;
 	outline: solid 3px rgba(230,230,230,.85);
 	background: rgba(255,155,155,.5);
+	-webkit-border-radius: 500px;
+	-moz-border-radius: 500px;
+	-ms-border-radius: 500px;
+	border-radius: 500px;
 }
 
 .hotspot.face {
-	background: rgba(155,255,155,.5);
+	background: rgba(155,155,255,.5);
 }
 
 .face-detect-panel .button {

@@ -4,7 +4,7 @@ Plugin Name: My eyes are up here
 Plugin URI: https://github.com/interconnectit/my-eyes-are-up-here
 Description: Detects faces during thumbnail cropping and moves the crop position accordingly
 Author: Robert O'Rourke @ interconnect/it
-Version: 0.1
+Version: 0.3
 Author URI: http://interconnectit.com
 
 Thanks to Marko Heijnen for feedback
@@ -13,14 +13,16 @@ https://github.com/markoheijnen
 Changelog
 =========
 
+- 0.3:
+	Hotspots!
+
 - 0.2:
-  jQuery option for speed
+	jQuery option for speed
+
 */
 
-if ( ! defined( 'FACE_DETECT_PATH' ) )
-	define( 'FACE_DETECT_PATH', plugin_dir_path( __FILE__ ) );
-if ( ! defined( 'FACE_DETECT_URL' ) )
-	define( 'FACE_DETECT_URL', plugins_url( '', __FILE__ ) );
+defined( 'FACE_DETECT_PATH' ) or define( 'FACE_DETECT_PATH', plugin_dir_path( __FILE__ ) );
+defined( 'FACE_DETECT_URL'  ) or define( 'FACE_DETECT_URL',  plugins_url( '', __FILE__ ) );
 
 // track attachment being modified
 add_action( 'plugins_loaded', array( 'WP_Detect_Faces', 'instance' ) );
@@ -102,11 +104,10 @@ class WP_Detect_Faces {
 
 	public function admin_scripts() {
 
-		wp_register_script( 'facedetection-pixastic', FACE_DETECT_URL . '/js/pixastic.custom.js' );
 		wp_register_script( 'facedetection-ccv', FACE_DETECT_URL . '/jquery-facedetection/js/facedetection/ccv.js', array( 'jquery' ) );
 		wp_register_script( 'facedetection-face', FACE_DETECT_URL . '/jquery-facedetection/js/facedetection/face.js', array( 'jquery', 'facedetection-ccv' ) );
 		wp_register_script( 'jquery-facedetection', FACE_DETECT_URL . '/jquery-facedetection/js/jquery.facedetection.js', array( 'facedetection-face' ) );
-		wp_register_script( 'facedetection', FACE_DETECT_URL . '/js/face-detect.js', array( 'jquery-facedetection', 'facedetection-pixastic' ), '0.2', true );
+		wp_register_script( 'facedetection', FACE_DETECT_URL . '/js/face-detect.js', array( 'jquery-facedetection' ), '0.2', true );
 		wp_localize_script( 'facedetection', 'facedetection', array(
 			'ajax_url' 				=> admin_url( '/admin-ajax.php' ),
 			'get_image_nonce' 		=> wp_create_nonce( 'fd_get_image' ),
