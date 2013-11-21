@@ -36,7 +36,7 @@ class WP_Detect_Faces {
 
 	/**
 	 * @var bool Switches on/off the PHP based face detection,
-	 * 			 recommended to use JS as MUCH it's quicker
+	 * 			 recommended to use JS as it's MUCH quicker
 	 */
 	public static $use_php = false;
 
@@ -78,6 +78,10 @@ class WP_Detect_Faces {
 		// get current attachment ID
 		add_filter( 'get_attached_file', array( $this, 'set_attachment_id' ), 10, 2 );
 		add_filter( 'update_attached_file', array( $this, 'set_attachment_id' ), 10, 2 );
+
+		// image resize dimensions
+		add_filter( 'image_resize_dimensions', array( $this, 'crop' ), 10, 6 );
+		add_filter( 'wp_generate_attachment_metadata', array( $this, 'reset' ), 10, 2 );
 
 		// use our extended class
 		if ( self::$use_php )
@@ -199,30 +203,28 @@ class WP_Detect_Faces {
 
 	public function regenerate_thumbs( $attachment_id ) {
 
-		// get existing data
-		$faces = get_post_meta( $attachment_id, 'faces', true );
-		if ( ! empty( $faces ) )
-			$this->faces = $faces;
-		$hotspots = get_post_meta( $attachment_id, 'hotspots', true );
-		if ( ! empty( $hotspots ) )
-			$this->hotspots = $hotspots;
-
-		// image resize dimensions
-		add_filter( 'image_resize_dimensions', array( $this, 'crop' ), 10, 6 );
-
+		// this sets up the faces & hotspots arrays
 		$file = get_attached_file( $attachment_id );
 
-		// $imagedata = wp_get_attachment_metadata( $attachment_id );
+		// 5 minutes per image should be PLENTY
+		@set_time_limit( 900 );
 
-		// update meta data
-		wp_update_attachment_metadata( $attachment_id, wp_generate_attachment_metadata( $attachment_id, $file ) );
+		// resize thumbs
+		$metadata = wp_generate_attachment_metadata( $attachment_id, $file );
+
+		if ( is_wp_error( $metadata ) )
+			return array( 'id' => $attachment_id, 'error' => $metadata->get_error_message() );
+		if ( empty( $metadata ) )
+			return array( 'id' => $attachment_id, 'error' => __( 'Unknown failure reason.' ) );
+
+		// If this fails, then it just means that nothing was changed (old value == new value)
+		wp_update_attachment_metadata( $attachment_id, $metadata );
 
 		$sizes = $this->get_cropped_sizes();
 		$resized = array();
 
 		foreach( $sizes as $size => $atts ) {
-			if ( $new_size = image_make_intermediate_size( $file, $atts[ 'width' ], $atts[ 'height' ], true ) )
-				$resized[ $size ] = wp_get_attachment_image_src( $attachment_id, $size );
+			$resized[ $size ] = wp_get_attachment_image_src( $attachment_id, $size );
 		}
 
 		return $resized;
@@ -325,7 +327,7 @@ class WP_Detect_Faces {
 	public function crop( $output, $orig_w, $orig_h, $dest_w, $dest_h, $crop ) {
 
 		// only need to detect if cropping
-		if ( $crop ) {
+		if ( $crop && ( ! empty( $this->faces ) || ! empty( $this->hotspots ) ) ) {
 
 			// if we have a face or two
 			$faces = array_merge( $this->faces, $this->hotspots );
@@ -405,7 +407,31 @@ class WP_Detect_Faces {
 	 */
 	public function set_attachment_id( $file, $attachment_id ) {
 		self::$attachment_id = $attachment_id;
+
+		// get existing data
+		$faces = get_post_meta( $attachment_id, 'faces', true );
+		if ( ! empty( $faces ) )
+			$this->faces = $faces;
+		$hotspots = get_post_meta( $attachment_id, 'hotspots', true );
+		if ( ! empty( $hotspots ) )
+			$this->hotspots = $hotspots;
+
 		return $file;
+	}
+
+
+	/**
+	 * Resets the faces and hotspots array ready for the next attachment
+	 *
+	 * @param array $metadata
+	 * @param int $attachment_id
+	 *
+	 * @return array
+	 */
+	public function reset( $metadata, $attachment_id ) {
+		$this->faces = array();
+		$this->hotspots = array();
+		return $metadata;
 	}
 
 	/**

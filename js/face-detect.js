@@ -95,8 +95,7 @@ if ( ! window.console )
 
 			update_status: function( status, loading ) {
 				loading = loading || false;
-				if ( status )
-					t.$status_box.html( status );
+				t.$status_box.html( status );
 				if ( loading )
 					t.$status_box.addClass( 'loading' );
 				else
@@ -262,9 +261,9 @@ if ( ! window.console )
 			hotspot_click: function( e ) {
 
 				var width = $( t.image ).width(),
-					hotspot_offset = ( width * .15 ) / 2;
-
-				console.log( width, hotspot_offset );
+					hotspot_maxwidth = 150,
+					hotspot_width = width * .15 > hotspot_maxwidth ? hotspot_maxwidth : width * .15,
+					hotspot_offset = hotspot_width / 2;
 
 				t.add_hotspot( {
 					x: e.offsetX - hotspot_offset,
@@ -277,12 +276,14 @@ if ( ! window.console )
 
 				var width = $( t.image ).width(),
 					height = $( t.image ).height(),
-					$parent = $( '.face-detection-image' );
+					$parent = $( '.face-detection-image' ),
+					hotspot_maxwidth = 150,
+					hotspot_width = width * .15 > hotspot_maxwidth ? hotspot_maxwidth : width * .15;
 
 				hotspot = $.extend( {
 					x: 0,
 					y: 0,
-					width: width * .15, // default 15% wide
+					width: hotspot_width, // default 15% wide, max-width 120px
 					type: 'normal'
 				}, hotspot );
 

@@ -21,7 +21,7 @@
 
 .face-detection-image .hotspot {
 	position: absolute;
-	max-width: 120px;
+	max-width: 150px;
 	min-width: 10px;
 	height: 0;
 	/*width: 15%;
@@ -29,12 +29,12 @@
 	margin-left: -7.5%;
 	margin-top: -7.5%;*/
 	border: 0px solid #ccc;
-	outline: solid 3px rgba(230,230,230,.85);
+	outline: solid 1px rgba(230,230,230,.85);
 	background: rgba(255,155,155,.5);
-	-webkit-border-radius: 500px;
+	/*-webkit-border-radius: 500px;
 	-moz-border-radius: 500px;
 	-ms-border-radius: 500px;
-	border-radius: 500px;
+	border-radius: 500px;*/
 }
 
 .hotspot.face {
