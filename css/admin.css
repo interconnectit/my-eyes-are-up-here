@@ -2,9 +2,14 @@
 	margin-bottom: 12px;
 }
 
+.face-detection-ui {
+	overflow: hidden;
+}
+
 .face-detection-image {
 	position: relative;
 	overflow: hidden;
+	float: left;
 }
 
 .face-detection-image.active {
