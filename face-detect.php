@@ -4,7 +4,7 @@ Plugin Name: My eyes are up here
 Plugin URI: https://github.com/interconnectit/my-eyes-are-up-here
 Description: Detects faces during thumbnail cropping and moves the crop position accordingly
 Author: Robert O'Rourke @ interconnect/it
-Version: 0.3
+Version: 0.4
 Author URI: http://interconnectit.com
 
 Thanks to Marko Heijnen for feedback
@@ -12,6 +12,9 @@ https://github.com/markoheijnen
 
 Changelog
 =========
+
+- 0.4:
+	Bugfixes, play nicely with other plugins/themes that modify image sizes
 
 - 0.3:
 	Hotspots!
@@ -80,8 +83,8 @@ class WP_Detect_Faces {
 		add_filter( 'update_attached_file', array( $this, 'set_attachment_id' ), 10, 2 );
 
 		// image resize dimensions
-		add_filter( 'image_resize_dimensions', array( $this, 'crop' ), 11, 6 );
 		add_filter( 'wp_generate_attachment_metadata', array( $this, 'reset' ), 10, 2 );
+		add_filter( 'image_resize_dimensions', array( $this, 'crop' ), 11, 6 );
 
 		// use our extended class
 		if ( self::$use_php )
@@ -333,7 +336,7 @@ class WP_Detect_Faces {
 			$faces = array_merge( $this->faces, $this->hotspots );
 
 			if ( count( $faces ) ) {
-				
+
 				if ( is_array( $output ) ) {
 					list( $dest_x, $dest_y, $src_x, $src_y, $new_w, $new_h, $src_w, $src_h ) = $output;
 				}
@@ -359,28 +362,28 @@ class WP_Detect_Faces {
 
 				// crop the largest possible portion of the original image that we can size to $dest_w x $dest_h
 				$aspect_ratio = $orig_w / $orig_h;
-				
+
 				// preserve settings already filtered in
 				if ( $output === null ) {
-					$new_w = min($dest_w, $orig_w);
-					$new_h = min($dest_h, $orig_h);
-	
+					$new_w = min( $dest_w, $orig_w );
+					$new_h = min( $dest_h, $orig_h );
+
 					if ( !$new_w ) {
-						$new_w = intval($new_h * $aspect_ratio);
+						$new_w = intval( $new_h * $aspect_ratio );
 					}
-	
+
 					if ( !$new_h ) {
-						$new_h = intval($new_w / $aspect_ratio);
+						$new_h = intval( $new_w / $aspect_ratio );
 					}
 				}
-	
-				$size_ratio = max($new_w / $orig_w, $new_h / $orig_h);
+
+				$size_ratio = max( $new_w / $orig_w, $new_h / $orig_h );
 
 				$crop_w = round($new_w / $size_ratio);
 				$crop_h = round($new_h / $size_ratio);
 
-				$src_x = floor( ($orig_w - $crop_w) / 2 );
-				$src_y = floor( ($orig_h - $crop_h) / 2 );
+				$src_x = floor( ( $orig_w - $crop_w ) / 2 );
+				$src_y = floor( ( $orig_h - $crop_h ) / 2 );
 
 				// bounding box
 				if ( $src_x == 0 ) {
@@ -400,7 +403,7 @@ class WP_Detect_Faces {
 
 		}
 
-		return null;
+		return $output;
 	}
 
 
