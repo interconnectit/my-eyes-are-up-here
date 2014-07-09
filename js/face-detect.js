@@ -265,9 +265,10 @@ if ( ! window.console )
 					hotspot_width = width * .15 > hotspot_maxwidth ? hotspot_maxwidth : width * .15,
 					hotspot_offset = hotspot_width / 2;
 
+				// Firefox doesn't do offsetX/Y so need to do something a little more complex
 				t.add_hotspot( {
-					x: e.offsetX - hotspot_offset,
-					y: e.offsetY - hotspot_offset
+					x: ( e.offsetX || e.clientX - ( $( e.target ).offset().left - window.scrollX ) ) - hotspot_offset,
+					y: ( e.offsetY || e.clientY - ( $( e.target ).offset().top  - window.scrollY ) ) - hotspot_offset
 				} );
 
 			},

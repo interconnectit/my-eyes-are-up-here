@@ -231,7 +231,7 @@ class WP_Detect_Faces {
 	}
 
 
-	function edit_fields( $form_fields, $attachment ) {
+	public function edit_fields( $form_fields, $attachment ) {
 
 		$faces = get_post_meta( $attachment->ID, 'faces', true );
 		$hotspots = get_post_meta( $attachment->ID, 'hotspots', true );
@@ -333,7 +333,7 @@ class WP_Detect_Faces {
 			$faces = array_merge( $this->faces, $this->hotspots );
 
 			if ( count( $faces ) ) {
-				
+
 				if ( is_array( $output ) ) {
 					list( $dest_x, $dest_y, $src_x, $src_y, $new_w, $new_h, $src_w, $src_h ) = $output;
 				}
@@ -359,21 +359,21 @@ class WP_Detect_Faces {
 
 				// crop the largest possible portion of the original image that we can size to $dest_w x $dest_h
 				$aspect_ratio = $orig_w / $orig_h;
-				
+
 				// preserve settings already filtered in
 				if ( $output === null ) {
 					$new_w = min($dest_w, $orig_w);
 					$new_h = min($dest_h, $orig_h);
-	
+
 					if ( !$new_w ) {
 						$new_w = intval($new_h * $aspect_ratio);
 					}
-	
+
 					if ( !$new_h ) {
 						$new_h = intval($new_w / $aspect_ratio);
 					}
 				}
-	
+
 				$size_ratio = max($new_w / $orig_w, $new_h / $orig_h);
 
 				$crop_w = round($new_w / $size_ratio);
