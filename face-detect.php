@@ -4,7 +4,7 @@ Plugin Name: My eyes are up here
 Plugin URI: https://github.com/interconnectit/my-eyes-are-up-here
 Description: Detects faces during thumbnail cropping and moves the crop position accordingly
 Author: Robert O'Rourke @ interconnect/it
-Version: 0.3
+Version: 0.4
 Author URI: http://interconnectit.com
 
 Thanks to Marko Heijnen for feedback
@@ -12,6 +12,9 @@ https://github.com/markoheijnen
 
 Changelog
 =========
+
+- 0.4:
+	Bugfixes, play nicely with other plugins/themes that modify image sizes
 
 - 0.3:
 	Hotspots!
@@ -80,8 +83,8 @@ class WP_Detect_Faces {
 		add_filter( 'update_attached_file', array( $this, 'set_attachment_id' ), 10, 2 );
 
 		// image resize dimensions
-		add_filter( 'image_resize_dimensions', array( $this, 'crop' ), 11, 6 );
 		add_filter( 'wp_generate_attachment_metadata', array( $this, 'reset' ), 10, 2 );
+		add_filter( 'image_resize_dimensions', array( $this, 'crop' ), 11, 6 );
 
 		// use our extended class
 		if ( self::$use_php )
@@ -400,7 +403,7 @@ class WP_Detect_Faces {
 
 		}
 
-		return null;
+		return $output;
 	}
 
 
