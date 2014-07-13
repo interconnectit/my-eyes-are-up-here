@@ -104,6 +104,9 @@ if ( ! window.console )
 
 			detect_faces: function() {
 
+				// Remove the previous copy, end up with one for every button press otherwise.
+				$( '.face-detect-large-hidden-copy' ).remove();
+
 				var $found_box = t.$context.find( '.found-faces' ),
 					image = $( '.face-detect-large-hidden' ).get( 0 ),
 					image_copy = $( image )
@@ -114,15 +117,18 @@ if ( ! window.console )
 									.get( 0 );
 
 				if ( $( t.el ).hasClass( 'has-faces' ) ) {
+
 					$( image_copy ).remove();
 					//$found_box.html( '' );
 					$( t.el )
 						.removeClass( 'has-faces' )
 						.html( 'Detect faces' );
+
 					$( '.face-detection-image' )
 						.data( 'faces', '' )
 						.find( '.face' )
 						.remove();
+
 					return t.save( { faces: 0 } );
 				}
 
@@ -150,22 +156,6 @@ if ( ! window.console )
 
 						t.update_status( 'Found ' + t.faces.length + ' faces, re-cropping thumbnails', true );
 
-						// append the faces found
-						//$.each( t.faces, function( i, item ) {
-						//	Pixastic.process( image_copy, 'crop', {
-						//		rect: {
-						//			left: item.x,
-						//			top: item.y,
-						//			width: item.width,
-						//			height: item.height
-						//		}
-						//	}, function( face ) {
-						//		$( face )
-						//			.removeAttr( 'id' )
-						//			.appendTo( $found_box );
-						//	} );
-						//} );
-
 						t.show_existing( t.faces, 'face' );
 
 						// cleanup
@@ -177,7 +167,7 @@ if ( ! window.console )
 					},
 					error: function( img, code, message  ) {
 						// update status - error, message
-						console.log( 'error', message );
+						console.log( 'error', message, img );
 						t.update_status( 'Error (' + code + '): ' + message );
 					}
 				} );

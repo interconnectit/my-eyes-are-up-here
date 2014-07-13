@@ -38,12 +38,6 @@ class WP_Detect_Faces {
 	public static $attachment_id;
 
 	/**
-	 * @var bool Switches on/off the PHP based face detection,
-	 * 			 recommended to use JS as it's MUCH quicker
-	 */
-	public static $use_php = false;
-
-	/**
 	 * @var placeholder for current faces array
 	 */
 	public $faces = array();
@@ -86,26 +80,17 @@ class WP_Detect_Faces {
 		add_filter( 'wp_generate_attachment_metadata', array( $this, 'reset' ), 10, 2 );
 		add_filter( 'image_resize_dimensions', array( $this, 'crop' ), 11, 6 );
 
-		// use our extended class
-		if ( self::$use_php )
-			add_filter( 'wp_image_editors', array( $this, 'image_editors' ), 11, 1 );
+		// javascript
+		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 
-		// set up js interface
-		if ( ! self::$use_php ) {
+		// ajax callbacks
+		// - get large image
+		add_action( 'wp_ajax_facedetect_get_image', array( $this, 'get_image' ) );
+		// - save faces
+		add_action( 'wp_ajax_facedetect_save', array( $this, 'save' ) );
 
-			// javascript
-			add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
-
-			// ajax callbacks
-			// - get large image
-			add_action( 'wp_ajax_facedetect_get_image', array( $this, 'get_image' ) );
-			// - save faces
-			add_action( 'wp_ajax_facedetect_save', array( $this, 'save' ) );
-
-			// add button
-			add_filter( 'attachment_fields_to_edit', array( $this, 'edit_fields' ), 10, 2 );
-
-		}
+		// add button
+		add_filter( 'attachment_fields_to_edit', array( $this, 'edit_fields' ), 10, 2 );
 	}
 
 
@@ -118,7 +103,7 @@ class WP_Detect_Faces {
 		wp_localize_script( 'facedetection', 'facedetection', array(
 			'ajax_url' 				=> admin_url( '/admin-ajax.php' ),
 			'get_image_nonce' 		=> wp_create_nonce( 'fd_get_image' ),
-			'save_nonce' 		=> wp_create_nonce( 'fd_save' )
+			'save_nonce' 			=> wp_create_nonce( 'fd_save' )
 		) );
 
 		// load our scripts
@@ -444,29 +429,4 @@ class WP_Detect_Faces {
 		$this->hotspots = array();
 		return $metadata;
 	}
-
-	/**
-	 * Inserts face detect image editor prior to the standard GD editor
-	 *
-	 * @param array $editors Array of image editor class names
-	 *
-	 * @return array    Image editor class names
-	 */
-	public function image_editors( $editors ) {
-		// Face detection class
-		if ( ! class_exists( 'Face_Detector' ) )
-			require_once 'php-facedetection/FaceDetector.php';
-
-		// Face detection image editor
-		if ( ! class_exists( 'WP_Image_Editor_GD_Detect_Face' ) )
-			require_once 'editors/gd-face-detect.php';
-
-		$offset = array_search( 'WP_Image_Editor_GD', $editors );
-		return array_merge(
-			array_slice( $editors, 0, $offset ),
-			array( 'WP_Image_Editor_GD_Detect_Face' ),
-			array_slice( $editors, $offset, null )
-		);
-	}
-
 }
