@@ -4,7 +4,7 @@ Donate link: https://myeyesareuphere.interconnectit.com/donate/
 Tags: My Eyes Are Up Here, thumbnails, image editing, image
 Requires at least: 3.8.1
 Tested up to: 4.0
-Stable tag: 0.4
+Stable tag: 1.0
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 

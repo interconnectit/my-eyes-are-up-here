@@ -4,7 +4,7 @@ Plugin Name: My eyes are up here
 Plugin URI: https://github.com/interconnectit/my-eyes-are-up-here
 Description: Detects faces during thumbnail cropping and moves the crop position accordingly
 Author: Robert O'Rourke @ interconnect/it
-Version: 0.4
+Version: 1.0
 Author URI: http://interconnectit.com
 
 Thanks to Marko Heijnen for feedback
