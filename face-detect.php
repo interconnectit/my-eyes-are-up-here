@@ -190,7 +190,7 @@ class WP_Detect_Faces {
 
 
 	public function regenerate_thumbs( $attachment_id ) {
-
+	
 		// this sets up the faces & hotspots arrays
 		$file = get_attached_file( $attachment_id );
 
@@ -221,6 +221,10 @@ class WP_Detect_Faces {
 
 	public function edit_fields( $form_fields, $attachment ) {
 
+		if ( ! wp_attachment_is_image( $attachment->ID ) ) {
+			return $form_fields;
+		}
+	
 		$faces = get_post_meta( $attachment->ID, 'faces', true );
 		$hotspots = get_post_meta( $attachment->ID, 'hotspots', true );
 
