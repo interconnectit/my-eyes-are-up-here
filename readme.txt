@@ -3,8 +3,8 @@ Contributors: interconnectit, sanchothefat, spectacula, AndyWalmsley
 Donate link: https://myeyesareuphere.interconnectit.com/donate/
 Tags: thumbnails, image editing, image, featured image
 Requires at least: 3.8.1
-Tested up to: 4.0
-Stable tag: 1.0
+Tested up to: 4.3
+Stable tag: 1.0.1
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,11 +73,8 @@ You can email us at cases@interconnectit.fogbugz.com with "My Eyes Are Up Here" 
 
 == Changelog ==
 
-= 1.2 =
-* Changes to readme.
-
-= 1.1 =
-* Extra screenshots added
+= 1.0.1 =
+* Now only runs on image attachments
 
 = 1.0 =
 * Release version
@@ -93,11 +90,8 @@ You can email us at cases@interconnectit.fogbugz.com with "My Eyes Are Up Here" 
 
 == Upgrade Notice ==
 
-= 1.2 =
-* Changes to readme.
-
-= 1.1 =
-* Extra screenshots added
+= 1.0.1 =
+* No longer runs on non image media
 
 = 1.0 =
 * Release version
