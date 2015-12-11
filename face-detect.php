@@ -176,7 +176,7 @@ class WP_Detect_Faces {
 				$width  = intval( get_option( $size . '_size_w' ) );
 				$height = intval( get_option( $size . '_size_h' ) );
 				$crop 	= get_option( $size . '_crop' );
-			} else {
+			} else if( isset($_wp_additional_image_sizes[ $size ]) ){
 				$width  = $_wp_additional_image_sizes[ $size ][ 'width' ];
 				$height = $_wp_additional_image_sizes[ $size ][ 'height' ];
 				$crop  	= $_wp_additional_image_sizes[ $size ][ 'crop' ];
