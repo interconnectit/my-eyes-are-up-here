@@ -24,14 +24,10 @@ Changelog
 
 */
 
-defined( 'FACE_DETECT_PATH' ) or define( 'FACE_DETECT_PATH', plugin_dir_path( __FILE__ ) );
-defined( 'FACE_DETECT_URL'  ) or define( 'FACE_DETECT_URL',  plugins_url( '', __FILE__ ) );
-
 // track attachment being modified
 add_action( 'plugins_loaded', array( 'WP_Detect_Faces', 'instance' ) );
 
 class WP_Detect_Faces {
-
 	/**
 	 * @var int|null Reference to currently edited attachment post
 	 */
@@ -51,24 +47,6 @@ class WP_Detect_Faces {
 	 */
 	protected static $instance = null;
 
-	/**
-	 * Creates a new instance. Called on 'after_setup_theme'.
-	 * May be used to access class methods from outside.
-	 *
-	 * @see    __construct()
-	 * @return void
-	 */
-	public static function instance() {
-		null === self :: $instance AND self :: $instance = new self;
-		return self :: $instance;
-	}
-
-
-	public function __construct() {
-
-		add_action( 'init', array( $this, 'init' ) );
-
-	}
 
 	public function init() {
 

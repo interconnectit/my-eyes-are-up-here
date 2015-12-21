@@ -21,10 +21,23 @@ if ( ! class_exists( 'MyEyesAreUpHere' ) ):
 		const REQUEST_AJAX = 'ajax';
 
 		/**
-		 * Init
+		 * Instance
+		 *
+		 * @var MyEyesAreUpHere
 		 */
-		public static function init() {
-			$self = new self;
+		private static $_instance;
+
+		/**
+		 * Get instance
+		 *
+		 * @return MyEyesAreUpHere
+		 */
+		public static function instance() {
+			if ( is_null( self::$_instance ) ) {
+				self::$_instance = new self;
+			}
+
+			return self::$_instance;
 		}
 
 		/**
@@ -52,9 +65,40 @@ if ( ! class_exists( 'MyEyesAreUpHere' ) ):
 		}
 
 		/**
+		 * Get plugin path
+		 *
+		 * @return string
+		 */
+		public function plugin_path() {
+			return untrailingslashit( plugin_dir_path( __FILE__ ) );
+		}
+
+		/**
+		 * Get plugin URL
+		 *
+		 * @return string
+		 */
+		public function plugin_url() {
+			return untrailingslashit( plugins_url( '/', __FILE__ ) );
+		}
+
+		/**
+		 * Get ajax URL
+		 *
+		 * @return string|void
+		 */
+		public function ajax_url() {
+			return admin_url( 'admin-ajax.php', 'relative' );
+		}
+
+		/**
 		 * Includes
 		 */
 		protected function includes() {
+			if ( $this->is_request( self::REQUEST_ADMIN ) ) {
+				require_once 'class-meauh-admin.php';
+			}
+
 			if ( $this->is_request( self::REQUEST_AJAX ) ) {
 				require_once 'class-meauh-ajax.php';
 			}
@@ -62,4 +106,14 @@ if ( ! class_exists( 'MyEyesAreUpHere' ) ):
 	}
 endif;
 
-MyEyesAreUpHere::init();
+/**
+ * Get instance
+ *
+ * @return MyEyesAreUpHere
+ */
+function MEAUH() {
+	return MyEyesAreUpHere::instance();
+}
+
+// Global for backwards compatibility
+$GLOBALS['meauh'] = MEAUH();

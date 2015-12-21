@@ -1,6 +1,3 @@
 [submodule "php-facedetection"]
 	path = php-facedetection
 	url = https://github.com/sanchothefat/php-facedetection.git
-[submodule "jquery-facedetection"]
-	path = jquery-facedetection
-	url = https://github.com/jaysalvat/jquery.facedetection.git
