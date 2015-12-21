@@ -10,3 +10,56 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+if ( ! class_exists( 'MyEyesAreUpHere' ) ):
+	/**
+	 * Class MyEyesAreUpHere
+	 */
+	final class MyEyesAreUpHere {
+		// requests
+		const REQUEST_ADMIN = 'admin';
+		const REQUEST_AJAX = 'ajax';
+
+		/**
+		 * Init
+		 */
+		public static function init() {
+			$self = new self;
+		}
+
+		/**
+		 * Constructor
+		 */
+		public function __construct() {
+			$this->includes();
+		}
+
+		/**
+		 * Determine request type
+		 *
+		 * @param string $type
+		 *
+		 * @return bool
+		 */
+		public function is_request( $type ) {
+			switch ( $type ) {
+				case self::REQUEST_ADMIN:
+					return is_admin();
+
+				case self::REQUEST_AJAX:
+					return defined( 'DOING_AJAX' );
+			}
+		}
+
+		/**
+		 * Includes
+		 */
+		protected function includes() {
+			if ( $this->is_request( self::REQUEST_AJAX ) ) {
+				require_once 'class-meauh-ajax.php';
+			}
+		}
+	}
+endif;
+
+MyEyesAreUpHere::init();
