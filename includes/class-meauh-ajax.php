@@ -60,7 +60,7 @@ if ( ! class_exists( 'MEAUH_Ajax' ) ):
 		/**
 		 * Save an image
 		 */
-		public function ajax_save_image() {
+		public function save_image() {
 			check_ajax_referer( self::NONCE_SAVE_IMAGE, 'nonce' );
 
 			$attachment_id = isset( $_POST['attachment_id'] ) ?
@@ -87,7 +87,7 @@ if ( ! class_exists( 'MEAUH_Ajax' ) ):
 				}
 
 				// regenerate thumbs
-				$resized = $this->regenerate_thumbnails( $attachment_id );
+				$resized = MEAUH_Attachment::regenerate( $attachment_id );
 
 				if ( $resized ) {
 					wp_send_json_success( array(

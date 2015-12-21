@@ -59,9 +59,9 @@ if (!window.console) {
                 }
 
                 that.update_status('Loading full size image', true);
-                $.post(detectFaces.ajax_url, {
-                    action: 'detect_faces_get_image',
-                    nonce: detectFaces.nonce_get_image,
+                $.post(meauh.ajax_url, {
+                    action: 'meauh_get_image',
+                    nonce: meauh.get_image_nonce,
                     attachment_id: that.attachment_id
                 }, function (response) {
                     if (response.success) {
@@ -331,9 +331,9 @@ if (!window.console) {
 
                 that.$ui.find('button').attr('disabled', 'disabled');
 
-                $.post(detectFaces.ajax_url, $.extend({
-                    action: 'detect_faces_save_image',
-                    nonce: detectFaces.nonce_save_image,
+                $.post(meauh.ajax_url, $.extend({
+                    action: 'meauh_save_image',
+                    nonce: meauh.save_image_nonce,
                     attachment_id: that.attachment_id
                 }, data), function (response) {
                     if (response.success) {

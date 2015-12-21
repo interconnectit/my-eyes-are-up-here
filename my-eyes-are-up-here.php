@@ -95,12 +95,10 @@ if ( ! class_exists( 'MyEyesAreUpHere' ) ):
 		 * Includes
 		 */
 		protected function includes() {
-			if ( $this->is_request( self::REQUEST_ADMIN ) ) {
-				require_once 'class-meauh-admin.php';
-			}
+			require_once 'includes/class-meauh-ajax.php';
 
-			if ( $this->is_request( self::REQUEST_AJAX ) ) {
-				require_once 'class-meauh-ajax.php';
+			if ( $this->is_request( self::REQUEST_ADMIN ) ) {
+				require_once 'includes/class-meauh-admin.php';
 			}
 		}
 	}

@@ -22,6 +22,7 @@ if ( ! class_exists( 'MEAUH_Admin' ) ):
 		 * Constructor
 		 */
 		public function __construct() {
+			$this->includes();
 		}
 
 		/**
@@ -31,27 +32,34 @@ if ( ! class_exists( 'MEAUH_Admin' ) ):
 			// main script
 			wp_enqueue_script(
 				'meauh-main',
-				$this->plugin_url() . '/assets/js/scripts.min.js',
+				MEAUH()->plugin_url() . '/assets/js/scripts.min.js',
 				array( 'jquery' ),
-				filemtime( $this->plugin_path() . '/assets/js/scripts.min.js' ),
+				filemtime( MEAUH()->plugin_path() . '/assets/js/scripts.min.js' ),
 				true
 			);
 
 			// main script variables
-			wp_localize_script( 'detect-faces-main', 'detectFaces', array(
-				'ajax_url'         => $this->ajax_url(),
-				'nonce_get_image'  => wp_create_nonce( self::NONCE_GET_IMAGE ),
-				'nonce_save_image' => wp_create_nonce( self::NONCE_SAVE_IMAGE )
+			wp_localize_script( 'meauh-main', 'meauh', array(
+				'ajax_url'         => MEAUH()->ajax_url(),
+				'get_image_nonce'  => wp_create_nonce( MEAUH_Ajax::NONCE_GET_IMAGE ),
+				'save_image_nonce' => wp_create_nonce( MEAUH_Ajax::NONCE_SAVE_IMAGE )
 			) );
 
 			// main style
 			wp_enqueue_style(
 				'meauh-main',
-				$this->plugin_url() . '/assets/css/main.min.css',
+				MEAUH()->plugin_url() . '/assets/css/main.min.css',
 				array(),
-				filemtime( $this->plugin_path() . '/assets/css/main.min.css' ),
+				filemtime( MEAUH()->plugin_path() . '/assets/css/main.min.css' ),
 				'all'
 			);
+		}
+
+		/**
+		 * Includes
+		 */
+		protected function includes() {
+			require_once 'class-meauh-attachment.php';
 		}
 	}
 endif;
