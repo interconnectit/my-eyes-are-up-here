@@ -1,0 +1,33 @@
+{
+  "name": "my-eyes-are-up-here",
+  "version": "1.0.1",
+  "author": "Evgenii Nasyrov <inasyrov@yandex.ru>",
+  "homepage": "https://interconnectit.com",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/interconnectit/my-eyes-are-up-here.git"
+  },
+  "bugs": {
+    "url": "https://github.com/interconnectit/my-eyes-are-up-here/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "http://opensource.org/licenses/MIT"
+    }
+  ],
+  "scripts": {
+    "postinstall": "bower install && grunt dist"
+  },
+  "devDependencies": {
+    "bower": "^1.7.1",
+    "grunt": "^0.4.5",
+    "grunt-autoprefixer": "^3.0.3",
+    "grunt-contrib-cssmin": "^0.14.0",
+    "grunt-contrib-jshint": "^0.11.3",
+    "grunt-contrib-uglify": "^0.11.0",
+    "load-grunt-tasks": "^3.3.0",
+    "time-grunt": "^1.2.2"
+  }
+}
