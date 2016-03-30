@@ -59,7 +59,7 @@
 
 .status.loading {
 	padding-left: 20px;
-	background: url(/wp-admin/images/wpspin_light.gif) no-repeat left center;
+	background: url(../img/spin.gif) no-repeat left center;
 	background-size: contain;
 }
 
@@ -97,7 +97,7 @@
 	display: inline-block;
 	margin-top: 5px;
 	margin-right: 5px;
-	background: url(/wp-admin/images/wpspin_light.gif) no-repeat center;
+	background: url(../img/spin.gif) no-repeat center;
 }
 
 .post-thumbnail-preview .preview-wrap img {

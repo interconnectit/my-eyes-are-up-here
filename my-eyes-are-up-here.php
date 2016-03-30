@@ -11,107 +11,104 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'MyEyesAreUpHere' ) ):
+/**
+ * Class MyEyesAreUpHere
+ */
+final class MyEyesAreUpHere {
+	const REQUEST_ADMIN = 'admin';
+	const REQUEST_AJAX = 'ajax';
+
 	/**
-	 * Class MyEyesAreUpHere
+	 * Instance
+	 *
+	 * @var MyEyesAreUpHere
 	 */
-	final class MyEyesAreUpHere {
-		// requests
-		const REQUEST_ADMIN = 'admin';
-		const REQUEST_AJAX = 'ajax';
+	private static $_instance;
 
-		/**
-		 * Instance
-		 *
-		 * @var MyEyesAreUpHere
-		 */
-		private static $_instance;
-
-		/**
-		 * Get instance
-		 *
-		 * @return MyEyesAreUpHere
-		 */
-		public static function instance() {
-			if ( is_null( self::$_instance ) ) {
-				self::$_instance = new self;
-			}
-
-			return self::$_instance;
+	/**
+	 * Get instance
+	 *
+	 * @return MyEyesAreUpHere
+	 */
+	public static function instance() {
+		if ( is_null( self::$_instance ) ) {
+			self::$_instance = new self;
 		}
 
-		/**
-		 * Constructor
-		 */
-		public function __construct() {
-			$this->includes();
-		}
+		return self::$_instance;
+	}
 
-		/**
-		 * Determine request type
-		 *
-		 * @param string $type
-		 *
-		 * @return bool
-		 */
-		public function is_request( $type ) {
-			switch ( $type ) {
-				case self::REQUEST_ADMIN:
-					return is_admin();
+	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		$this->includes();
+	}
 
-				case self::REQUEST_AJAX:
-					return defined( 'DOING_AJAX' );
-			}
-		}
+	/**
+	 * Determine request type
+	 *
+	 * @param string $type Request type.
+	 *
+	 * @return bool
+	 */
+	public function is_request( $type ) {
+		switch ( $type ) {
+			case self::REQUEST_ADMIN:
+				return is_admin();
 
-		/**
-		 * Get plugin path
-		 *
-		 * @return string
-		 */
-		public function plugin_path() {
-			return untrailingslashit( plugin_dir_path( __FILE__ ) );
-		}
-
-		/**
-		 * Get plugin URL
-		 *
-		 * @return string
-		 */
-		public function plugin_url() {
-			return untrailingslashit( plugins_url( '/', __FILE__ ) );
-		}
-
-		/**
-		 * Get ajax URL
-		 *
-		 * @return string|void
-		 */
-		public function ajax_url() {
-			return admin_url( 'admin-ajax.php', 'relative' );
-		}
-
-		/**
-		 * Includes
-		 */
-		protected function includes() {
-			require_once 'includes/class-meauh-ajax.php';
-
-			if ( $this->is_request( self::REQUEST_ADMIN ) ) {
-				require_once 'includes/class-meauh-admin.php';
-			}
+			case self::REQUEST_AJAX:
+				return defined( 'DOING_AJAX' );
 		}
 	}
-endif;
+
+	/**
+	 * Get plugin path
+	 *
+	 * @return string
+	 */
+	public function plugin_path() {
+		return untrailingslashit( plugin_dir_path( __FILE__ ) );
+	}
+
+	/**
+	 * Get plugin URL
+	 *
+	 * @return string
+	 */
+	public function plugin_url() {
+		return untrailingslashit( plugins_url( '/', __FILE__ ) );
+	}
+
+	/**
+	 * Get ajax URL
+	 *
+	 * @return string
+	 */
+	public function ajax_url() {
+		return admin_url( 'admin-ajax.php', 'relative' );
+	}
+
+	/**
+	 * Includes
+	 */
+	protected function includes() {
+		require_once 'includes/class-meauh-ajax.php';
+
+		if ( $this->is_request( self::REQUEST_ADMIN ) ) {
+			require_once 'includes/class-meauh-admin.php';
+		}
+	}
+}
 
 /**
  * Get instance
  *
  * @return MyEyesAreUpHere
  */
-function MEAUH() {
+function meauh() {
 	return MyEyesAreUpHere::instance();
 }
 
-// Global for backwards compatibility
-$GLOBALS['meauh'] = MEAUH();
+// Global for backwards compatibility.
+$GLOBALS['meauh'] = meauh();

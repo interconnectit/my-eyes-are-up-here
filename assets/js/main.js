@@ -140,11 +140,8 @@ if (!window.console) {
 
                 // face detection
                 return $(image_copy).faceDetection({
-                    confidence: 0.05,
                     complete: function (faces) {
                         // update status - found faces
-                        console.log('faces:', faces);
-
                         that.faces = faces;
 
                         if (!that.faces.length) {
@@ -166,7 +163,6 @@ if (!window.console) {
 
                         // save data & regen
                         that.save({faces: that.faces});
-
                     },
                     error: function (img, code, message) {
                         // update status - error, message
