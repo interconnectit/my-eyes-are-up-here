@@ -180,14 +180,16 @@ if (!window.console) {
                     correction = that.images.original[1] / width,
                     hotspot_width;
 
-                if (data && data !== '') {
+                if (data && data.length) {
                     $.each(data, function (i, hotspot) {
-                        that.add_hotspot({
-                            x: (hotspot.x / correction), // + ((hotspot_width/correction)/2),
-                            y: (hotspot.y / correction), // + ((hotspot_width/correction)/2),
-                            width: hotspot.width / correction,
-                            type: type
-                        });
+                        if (hotspot !== '') {
+                            that.add_hotspot({
+                                x: (hotspot.x / correction), // + ((hotspot_width/correction)/2),
+                                y: (hotspot.y / correction), // + ((hotspot_width/correction)/2),
+                                width: hotspot.width / correction,
+                                type: type
+                            });
+                        }
                     });
                 }
             },
