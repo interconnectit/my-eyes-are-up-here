@@ -280,6 +280,10 @@ if (!window.console) {
                     type: 'normal'
                 }, hotspot);
 
+                // Prevent hotspots from being placed outside edges of image.
+                hotspot.x = Math.max( (0 - (hotspot.width / 2)), Math.min( hotspot.x, (width - (hotspot.width / 2)) ) );
+                hotspot.y = Math.max( (0 - (hotspot.width / 2)), Math.min( hotspot.y, (height - (hotspot.width / 2)) ) );
+
                 $('<div class="hotspot ' + hotspot.type + '"></div>')
                     .css({
                         left: ( ( hotspot.x / width ) * 100 ) + '%',
