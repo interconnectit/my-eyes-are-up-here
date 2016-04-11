@@ -21,6 +21,7 @@
 
 .face-detection-image img {
 	max-width: 100%;
+	vertical-align: middle;
 	height: auto;
 	width: auto;
 }
