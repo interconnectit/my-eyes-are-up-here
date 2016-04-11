@@ -1,0 +1,96 @@
+# Copyright (C) 2016 interconnect/it
+# This file is distributed under the same license as the My Eyes Are Up Here package.
+msgid ""
+msgstr ""
+"Project-Id-Version: My Eyes Are Up Here 1.1.3\n"
+"Report-Msgid-Bugs-To: "
+"https://github.com/interconnectit/my-eyes-are-up-here/issues\n"
+"POT-Creation-Date: 2016-04-01 11:05:34+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2016-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"X-Generator: grunt-wp-i18n 0.5.4\n"
+
+#: includes/class-meauh-attachment.php:68
+msgid "Unknown failure reason"
+msgstr ""
+
+#: includes/class-meauh-attachment.php:220
+msgid "Thumb Previews"
+msgstr ""
+
+#: includes/class-meauh-attachment.php:234
+msgid "Forget found faces"
+msgstr ""
+
+#: includes/class-meauh-attachment.php:239
+msgid "Detect faces"
+msgstr ""
+
+#: includes/class-meauh-attachment.php:245
+msgid ""
+"Please note this is basic face detection and won't find everything. Use "
+"hotspots to highlight any that were missed."
+msgstr ""
+
+#: includes/class-meauh-attachment.php:251
+#: includes/class-meauh-attachment.php:281
+msgid "%d %s found, thumbnails regenerated to fit them into crop area."
+msgstr ""
+
+#: includes/class-meauh-attachment.php:253
+msgid "face"
+msgid_plural "faces"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-meauh-attachment.php:265
+msgid "Edit hotspots"
+msgstr ""
+
+#: includes/class-meauh-attachment.php:270
+msgid "Add hotspots"
+msgstr ""
+
+#: includes/class-meauh-attachment.php:276
+msgid "Manually add hotspots that you want to avoid cropping."
+msgstr ""
+
+#: includes/class-meauh-attachment.php:283
+msgid "hotspot"
+msgid_plural "hotspots"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-meauh-attachment.php:294
+msgid "This plugin requires javascript to work"
+msgstr ""
+
+#: includes/class-meauh-attachment.php:298
+msgid "Face detection"
+msgstr ""
+
+#. Plugin Name of the plugin/theme
+msgid "My Eyes Are Up Here"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "https://github.com/interconnectit/my-eyes-are-up-here"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"Detects faces during thumbnail cropping and moves the crop position "
+"accordingly."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "interconnect/it"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://interconnectit.com"
+msgstr ""
