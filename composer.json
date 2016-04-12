@@ -1,0 +1,24 @@
+{
+  "name": "interconnectit/my-eyes-are-up-here",
+  "type": "wordpress-plugin",
+  "license": "GPLv2",
+  "description": "My Eyes Are Up Here helps you control how WordPress generates thumbnails.",
+  "homepage": "https://github.com/interconnectit/my-eyes-are-up-here",
+  "authors": [
+    {
+      "name": "interconnect/it",
+      "email": "support@interconnectit.com",
+      "homepage": "https://github.com/interconnectit"
+    }
+  ],
+  "keywords": [
+    "wordpress"
+  ],
+  "support": {
+    "issues": "https://github.com/interconnectit/my-eyes-are-up-here/issues"
+  },
+  "require": {
+    "php": ">=5.4.0",
+    "composer/installers": "~1.0"
+  }
+}
