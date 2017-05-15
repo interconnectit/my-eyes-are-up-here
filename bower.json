@@ -1,0 +1,12 @@
+{
+  "name": "my-eyes-are-up-here",
+  "homepage": "https://interconnectit.com",
+  "authors": [
+    "Evgenii Nasyrov <evgenii@interconnectit.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "jquery.facedetection": "~2.0.2"
+  }
+}
