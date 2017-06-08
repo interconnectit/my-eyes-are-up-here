@@ -24,6 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class MyEyesAreUpHere {
 	const REQUEST_ADMIN = 'admin';
 	const REQUEST_AJAX = 'ajax';
+	const REQUEST_WP_CLI = 'wp-cli';
 
 	/**
 	 * Instance
@@ -67,6 +68,9 @@ final class MyEyesAreUpHere {
 
 			case self::REQUEST_AJAX:
 				return defined( 'DOING_AJAX' );
+
+			case self::REQUEST_WP_CLI:
+				return ( defined( 'WP_CLI' ) && WP_CLI );
 		}
 	}
 
@@ -115,6 +119,10 @@ final class MyEyesAreUpHere {
 
 		if ( $this->is_request( self::REQUEST_ADMIN ) ) {
 			require_once 'includes/class-meauh-admin.php';
+		}
+
+		if ( $this->is_request( self::REQUEST_WP_CLI ) ) {
+			require_once 'includes/class-meauh-attachment.php';
 		}
 	}
 
