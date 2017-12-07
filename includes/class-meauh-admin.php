@@ -64,7 +64,6 @@ class MEAUH_Admin {
 	 * Includes
 	 */
 	protected function includes() {
-		require_once 'class-meauh-attachment.php';
 	}
 }
 
