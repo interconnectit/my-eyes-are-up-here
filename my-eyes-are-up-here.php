@@ -112,6 +112,7 @@ final class MyEyesAreUpHere {
 	 */
 	protected function includes() {
 		require_once 'includes/class-meauh-ajax.php';
+		require_once 'includes/class-meauh-attachment.php';
 
 		if ( $this->is_request( self::REQUEST_ADMIN ) ) {
 			require_once 'includes/class-meauh-admin.php';
