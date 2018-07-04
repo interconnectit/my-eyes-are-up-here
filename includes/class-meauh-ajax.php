@@ -86,6 +86,9 @@ class MEAUH_Ajax {
 
 		// Regenerate thumbs.
 		$resized = MEAUH_Attachment::regenerate( $attachment_id );
+
+		do_action('meauh_after_image_regeneration', $attachment_id);
+
 		if ( $resized ) {
 			wp_send_json_success( array(
 				'resized' => $resized,
