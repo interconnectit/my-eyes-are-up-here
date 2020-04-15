@@ -40,6 +40,8 @@ class MEAUH_Ajax {
 				add_action( 'wp_ajax_nopriv_meauh_' . $event, array( $self, $event ) );
 			}
 		}
+
+        add_action( 'wp_ajax_save-attachment-compat', 'save_image', 0, 1 );
 	}
 
 	/**
