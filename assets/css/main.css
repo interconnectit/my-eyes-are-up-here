@@ -46,7 +46,14 @@
 .face-detect-panel .button {
     margin-right: 5px;
     margin-bottom: 5px;
-    display: inline-block;
+    display: block;
+}
+
+.face-detect-panel .button[disabled] ~ .description {
+    display: none;
+}
+.face-detect-panel .button.active ~ .description {
+    display: none;
 }
 
 .status.loading {
@@ -105,4 +112,40 @@
     position: absolute;
     left: 9999px;
     top: -9999px;
+}
+
+.button.add-hotspots.active {
+    background: #3c9e3c;
+    color: #FFF;
+    animation-name: pulse_animation;
+    animation-duration: 3000ms;
+    transform-origin:70% 70%;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+.button.add-hotspots.active:hover {
+    background: #368436;
+}
+
+@keyframes pulse_animation {
+    0% { transform: scale(1); }
+    30% { transform: scale(1); }
+    40% { transform: scale(1.08); }
+    50% { transform: scale(1); }
+    60% { transform: scale(1); }
+    70% { transform: scale(1.05); }
+    80% { transform: scale(1); }
+    100% { transform: scale(1); }
+}
+
+.face-detect-panel__container {
+    display: flex;
+    flex-flow: row wrap;
+}
+.face-detect-panel__container > * {
+    flex: 1 1 200px;
+}
+
+.face-detection-image {
+    margin-bottom: 10px;
 }

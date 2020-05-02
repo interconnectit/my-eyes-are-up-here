@@ -225,8 +225,43 @@ class MEAUH_Attachment {
 		}
 
 		$button .= '
-			</div>
-			<div class="face-detection face-detect-panel">';
+			</div>';
+		
+		$button .= '<div class="face-detect-panel__container">';
+		
+		$button .= '<div class="image-hotspots face-detect-panel">';
+
+		if ( $hotspots ) {
+			$button .= sprintf( '<button class="button add-hotspots has-hotspots" type="button" data-attachment-id="%d">%s</button>',
+				$attachment->ID,
+				__( 'Edit hotspots', 'my-eyes-are-up-here' )
+			);
+		} else {
+			$button .= sprintf( '<button class="button add-hotspots" type="button" data-attachment-id="%d">%s</button>',
+				$attachment->ID,
+				__( 'Add hotspots', 'my-eyes-are-up-here' )
+			);
+		}
+
+		$button .= '<span class="status"></span>';
+		$button .= sprintf( '<p class="description">%s</p>',
+			__( 'Manually add hotspots that you want to avoid cropping.', 'my-eyes-are-up-here' )
+		);
+
+		if ( false && $hotspots ) {
+			$button .= '<p class="added-hotspots">';
+			$button .= sprintf( __( '%d %s found, thumbnails regenerated to fit them into crop area.',
+				'my-eyes-are-up-here' ),
+				count( $hotspots ),
+				_n( 'hotspot', 'hotspots', count( $hotspots ), 'my-eyes-are-up-here' )
+			);
+			$button .= '</p>';
+		}
+
+		$button .= '
+			</div>';
+		
+		$button .= '<div class="face-detection face-detect-panel">';
 
 		if ( $faces ) {
 			$button .= sprintf( '<button class="button face-detection-activate has-faces" type="button" data-attachment-id="%d">%s</button>',
@@ -258,40 +293,14 @@ class MEAUH_Attachment {
 		}
 
 		$button .= '
-			</div>
-			<div class="image-hotspots face-detect-panel">';
+			</div>';
 
-		if ( $hotspots ) {
-			$button .= sprintf( '<button class="button add-hotspots has-hotspots" type="button" data-attachment-id="%d">%s</button>',
-				$attachment->ID,
-				__( 'Edit hotspots', 'my-eyes-are-up-here' )
-			);
-		} else {
-			$button .= sprintf( '<button class="button add-hotspots" type="button" data-attachment-id="%d">%s</button>',
-				$attachment->ID,
-				__( 'Add hotspots', 'my-eyes-are-up-here' )
-			);
-		}
+		$button .= '</div>';
 
-		$button .= '<span class="status"></span>';
-		$button .= sprintf( '<p class="description">%s</p>',
-			__( 'Manually add hotspots that you want to avoid cropping.', 'my-eyes-are-up-here' )
-		);
+		$button .= '<div class="face-detection-crop-preview"></div>
+		<div class="face-detection-image"' . $data_atts . '></div>';
 
-		if ( false && $hotspots ) {
-			$button .= '<p class="added-hotspots">';
-			$button .= sprintf( __( '%d %s found, thumbnails regenerated to fit them into crop area.',
-				'my-eyes-are-up-here' ),
-				count( $hotspots ),
-				_n( 'hotspot', 'hotspots', count( $hotspots ), 'my-eyes-are-up-here' )
-			);
-			$button .= '</p>';
-		}
-
-		$button .= '
-			</div>
-			<div class="face-detection-crop-preview"></div>
-			<div class="face-detection-image"' . $data_atts . '></div>
+		$button .= '	
 		</div>
 		<div class="hide-if-js">
 			<p>' . __( 'This plugin requires javascript to work', 'my-eyes-are-up-here' ) . '</p>
