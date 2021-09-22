@@ -148,9 +148,20 @@ class MEAUH_Attachment {
 			}
 		}
 
-		$hotspot_src_w = $hotspot_src_max_x - $hotspot_src_x;
-		$hotspot_src_h = $hotspot_src_max_y - $hotspot_src_y;
-
+        // if hot spot max and min are the same its possible that there is only one and the user wants to center it there
+        $hotspot_count = count($hotspots);
+        if($hotspot_count === 1 && $hotspot_src_max_x === $hotspot_src_x) {
+            $hotspot_src_w = $hotspot_src_x / 2;
+        } else {
+            $hotspot_src_w = $hotspot_src_max_x - $hotspot_src_x;
+        }
+        // same goes for height and y axis
+        if($hotspot_count === 1 && $hotspot_src_max_y === $hotspot_src_y) {
+            $hotspot_src_h = $hotspot_src_y / 2;
+        } else {
+            $hotspot_src_h = $hotspot_src_max_y - $hotspot_src_y;
+        }
+        
 		// Crop the largest possible portion of the original image that we can size to $dest_w x $dest_h.
 		$aspect_ratio = $orig_w / $orig_h;
 

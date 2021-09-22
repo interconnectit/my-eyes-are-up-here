@@ -41,7 +41,7 @@ class MEAUH_Ajax {
 			}
 		}
 
-        add_action( 'wp_ajax_save-attachment-compat', 'save_image', 0, 1 );
+        add_action( 'wp_ajax_save-attachment-compat', [$self, 'save_image'], 0, 1 );
 	}
 
 	/**
@@ -89,7 +89,8 @@ class MEAUH_Ajax {
 		// Regenerate thumbs.
 		$resized = MEAUH_Attachment::regenerate( $attachment_id );
 
-		do_action('meauh_after_image_regeneration', $attachment_id);
+        // Run custom code when finished
+        do_action('meauh_after_image_regeneration', $attachment_id);
 
 		if ( $resized ) {
 			wp_send_json_success( array(
