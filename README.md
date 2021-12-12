@@ -42,3 +42,9 @@ Cropped landscape version using this plugin:
 |   --|--   |
 +-----------+
 ```
+
+## Actions
+
+### `meauh_after_image_regeneration`
+#### Parameter
+`$attachment_id` *(int)* Runs just after the image regeneration has finished.
